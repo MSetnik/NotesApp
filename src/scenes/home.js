@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, FlatList } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import CircleBtn from "../components/atoms/circle-btn";
 import Header from "../components/molecules/header";
 
@@ -15,19 +15,11 @@ import { data } from "../assets/dummy-data";
 
 const Home = ({ navigation }) => {
   const renderItem = ({ item, index }) => {
-    // if (index % 3 === 0) {
-    //   return (
-    //     <NoteCard type={2} navigation={navigation}/>
-    //   );
-    // } else {
-    //   <NoteCard type={1} navigation={navigation}/>;
-    // }
-    if (index % 3 === 0) {
-      return (
-        <NoteCard type={1} navigation={navigation}/>
-
-      );
+    if (item[0] !== undefined) {
+      return <NoteCard item={item} type={1} navigation={navigation}/>;
     }
+
+    return <NoteCard item={item} type={2} navigation={navigation}/>;
   };
   return (
     <View style={{ flex: 1, backgroundColor: Colors.themeColor().background, paddingTop: Typography.FONT_SIZE_TITLE_LG * 2 }}>
@@ -42,7 +34,12 @@ const Home = ({ navigation }) => {
         }
       />
 
-      <FlatList style={{ flex: 1 }} data={data} renderItem={renderItem} keyExtractor={item => item.id} />
+      <FlatList
+        style={{ flex: 1 }}
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+      />
 
       <View style={[{ position: "absolute", bottom: 40, right: 40 }, SharedStyles.shadow.elevation5]}>
         <CircleBtn

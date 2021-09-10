@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { View, Text, TextInput, KeyboardAvoidingView, Platform, Pressable } from "react-native";
 
 // Styles
@@ -10,9 +10,19 @@ import Header from "../components/molecules/header";
 
 // Expo icons
 import { Feather } from "@expo/vector-icons";
+import { dateHelper } from "../helpers";
 
 const NoteDetails = ({ navigation, route }) => {
   const editText = useRef(null);
+  let note;
+  const date = new Date();
+
+  if (route.params !== undefined) {
+    note = route.params.item;
+  }
+
+  const [title, setTitle] = useState(note !== undefined ? note.title : "");
+  const [content, setContent] = useState(note !== undefined ? note.content : "");
 
   return (
     <View style={{
@@ -46,10 +56,12 @@ const NoteDetails = ({ navigation, route }) => {
           marginTop: 10,
           fontWeight: "bold"
         }}
+        onChangeText={(e) => setTitle(e)}
         placeholder='Title'
+        value={title}
         />
 
-        <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL, marginTop: 20, color: "#838383" }}>May 20, 2021</Text>
+        <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL, marginTop: 20, color: "#838383" }}>{note !== undefined ? dateHelper.formatDate(note.date) : dateHelper.formatDate(date)}</Text>
 
         <View style={{ flex: 1, marginTop: 10 }} >
           <Pressable style={{ flex: 1 }} onPress={() => {
@@ -62,7 +74,9 @@ const NoteDetails = ({ navigation, route }) => {
                 fontSize: Typography.FONT_SIZE_TITLE_LG,
                 fontWeight: "bold"
               }}
+              onChangeText={(e) => setContent(e)}
               placeholder="Type something ..."
+              value={content}
             />
           </Pressable>
 
