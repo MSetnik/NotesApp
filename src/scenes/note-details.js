@@ -14,6 +14,7 @@ import { dateHelper } from "../helpers";
 
 const NoteDetails = ({ navigation, route }) => {
   const editText = useRef(null);
+
   let note;
   const date = new Date();
 
