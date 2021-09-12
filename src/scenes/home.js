@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, FlatList } from "react-native";
+import React, { useContext } from "react";
+import { View, Text, FlatList, LogBox } from "react-native";
 import CircleBtn from "../components/atoms/circle-btn";
 import Header from "../components/molecules/header";
 
@@ -10,17 +10,21 @@ import NoteCard from "../components/molecules/note-card";
 import { Feather } from "@expo/vector-icons";
 import { Colors, SharedStyles, Typography } from "../styles";
 
-// data
-import { data } from "../assets/dummy-data";
+// Store
+import { StoreContext } from "../store/reducer";
 
 const Home = ({ navigation }) => {
+  const store = useContext(StoreContext);
+
+  const notes = store.state.notes;
+  console.log(store);
   // Formatiranje JSON podataka za ispis
   const data1 = () => {
     const d = [];
 
     let array = [];
     let index1 = 1;
-    data.forEach((el, index) => {
+    notes.forEach((el, index) => {
       if (index1 % 3 === 0) {
         index1 = 0;
         d.push(array);
@@ -30,7 +34,7 @@ const Home = ({ navigation }) => {
         array.push(el);
       }
 
-      if (index + 1 === data.length && index1 % 3 !== 0) {
+      if (index + 1 === notes.length && index1 % 3 !== 0) {
         d.push(array);
       }
 
