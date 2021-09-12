@@ -1,68 +1,20 @@
 import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import { Typography, Colors } from "../../styles";
+import { Typography } from "../../styles";
 
 // Helpers
 import { dateHelper } from "../../helpers";
-
-// Styles
-
-const colors = [
-  Colors.themeColor().card1,
-  Colors.themeColor().card2,
-  Colors.themeColor().card3,
-  Colors.themeColor().card4,
-  Colors.themeColor().card5,
-  Colors.themeColor().card6
-];
 
 const NoteCard = ({
   type = 1,
   item,
   navigation
 }) => {
-  const getRandomColor = () => {
-    let c;
-    const index = Math.floor(Math.random() * 6);
-    colors.forEach((color, i) => {
-      if (i === index) {
-        c = color;
-      }
-    });
-
-    return c;
-  };
-
   if (type === 1) {
-    // if ((index + 1) % 2 === 0) {
-    //   return (
-    //     <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
-    //       <Pressable
-    //         style={[styles.cardShort, { backgroundColor: "blue" }]}
-    //         onPress={() => navigation.navigate("NoteDetails", { item: item })}
-    //       >
-    //         <Text style={styles.noteTitle} numberOfLines={3}>{item.title !== "" ? item.title : item.content}</Text>
-
-    //         <Text style={{ justifyContent: "flex-end" }}>{dateHelper.formatDate(item.date)}</Text>
-    //       </Pressable>
-    //     </View>
-    //   );
-    // } else {
-    //   return (<View style={{ flexDirection: "row", justifyContent: "flex-start" }}>
-    //     <Pressable
-    //       style={[styles.cardShort, { backgroundColor: "red" }]}
-    //       onPress={() => navigation.navigate("NoteDetails", { item: item })}
-    //     >
-    //       <Text style={styles.noteTitle} numberOfLines={3}>{item.title !== "" ? item.title : item.content}</Text>
-
-    //       <Text style={{ justifyContent: "flex-end" }}>{dateHelper.formatDate(item.date)}</Text>
-    //     </Pressable>
-    //   </View>);
-    // }
     return (
       <View style={{ flexDirection: "row", justifyContent: item[1] !== undefined ? "space-evenly" : "flex-start", marginBottom: 10, marginLeft: item[1] !== undefined ? 0 : 10 }}>
         <Pressable
-          style={[styles.cardShort, { backgroundColor: getRandomColor() }]}
+          style={[styles.cardShort, { backgroundColor: item[0].color }]}
           onPress={() => navigation.navigate("NoteDetails", { item: item[0] })}
         >
           <Text style={styles.noteTitle} numberOfLines={3}>{item[0].title !== "" ? item[0].title : item[0].content}</Text>
@@ -73,7 +25,7 @@ const NoteCard = ({
         {
           item[1] !== undefined &&
           <Pressable
-            style={[styles.cardShort, { backgroundColor: getRandomColor() }]}
+            style={[styles.cardShort, { backgroundColor: item[1].color }]}
             onPress={() => navigation.navigate("NoteDetails", { item: item[1] })}
           >
             <Text style={styles.noteTitle} numberOfLines={3}>{item[1].title !== "" ? item[1].title : item[1].content}</Text>
@@ -89,7 +41,7 @@ const NoteCard = ({
     return (
       <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 10 }}>
         <Pressable
-          style={[styles.cardLong, { backgroundColor: getRandomColor() }]}
+          style={[styles.cardLong, { backgroundColor: item.color }]}
           onPress={() => navigation.navigate("NoteDetails", { item: item })}
         >
           <Text style={styles.noteTitle} numberOfLines={3}>{item.title !== "" ? item.title : item.content}</Text>
