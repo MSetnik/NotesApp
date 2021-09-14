@@ -1,10 +1,9 @@
-import React, { useContext } from "react";
-import { View, Text, FlatList, LogBox } from "react-native";
-import CircleBtn from "../components/atoms/circle-btn";
-import Header from "../components/molecules/header";
+import React, { useContext, useEffect, useRef } from "react";
+import { View, Text, FlatList } from "react-native";
 
 // Component
-import NoteCard from "../components/molecules/note-card";
+import { NoteCard, Header } from "../components/molecules";
+import { CircleBtn, NoDataMessage } from "../components/atoms";
 
 // Expo icons
 import { Feather } from "@expo/vector-icons";
@@ -13,11 +12,16 @@ import { Colors, SharedStyles, Typography } from "../styles";
 // Store
 import { StoreContext } from "../store/reducer";
 
+// Localization
+import { localization } from "../localization";
+
+const SETTINGS = false;
+
 const Home = ({ navigation }) => {
   const store = useContext(StoreContext);
 
   const notes = store.state.notes;
-  console.log(store);
+
   // Formatiranje JSON podataka za ispis
   const data1 = () => {
     const d = [];
@@ -52,42 +56,50 @@ const Home = ({ navigation }) => {
   };
 
   const keyExtractor = (item) => {
+    let key;
     if (item[0] !== undefined) {
-      return item[0].id;
+      key = item[0].id.toString();
+      return key;
     }
 
-    return item.id;
+    key = item.id.toString();
+    return key;
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.themeColor().background, paddingTop: Typography.FONT_SIZE_TITLE_LG * 2 }}>
       <Header
         leftElement={
-          <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL * 2 }}>Notes</Text>
+          <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL * 2 }}>{localization("notes")}</Text>
         }
-        rightElement={
-          <CircleBtn color={Colors.themeColor().btnColor}>
-            <Feather name="search" size={24} color="black" />
-          </CircleBtn>
-        }
+
+        rightElement={SETTINGS && <CircleBtn
+          color={Colors.themeColor().btnColor}
+          onPress={() => navigation.navigate("Settings")}>
+          <Feather name="settings" size={Typography.FONT_SIZE_TITLE_MD} color="black" />
+        </CircleBtn> }
       />
 
-      <FlatList
-        style={{ flex: 1 }}
-        data={ data1() }
-        renderItem={renderItem}
-        keyExtractor={(item) => keyExtractor(item)}
-      />
+      {
+        notes.length !== 0 ? <FlatList
+          style={{ flex: 1 }}
+          data={data1()}
+          renderItem={renderItem}
+          keyExtractor={(item) => keyExtractor(item)}
+        /> : <NoDataMessage
+          icon={<Feather name="alert-octagon" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor().textColor} />}
+          text={localization("noDataText")}
+          style={{ marginTop: Typography.FONT_SIZE_TITLE_MD }}
+          textStyle={{ marginLeft: Typography.FONT_SIZE_TITLE_MD * 0.5 }}/>
+      }
 
-      <View style={[{ position: "absolute", bottom: 40, right: 40 }, SharedStyles.shadow.elevation5]}>
+      <View style={[{ position: "absolute", bottom: Typography.FONT_SIZE_TITLE_MD * 2, right: Typography.FONT_SIZE_TITLE_MD * 2 }, SharedStyles.shadow.elevation5]}>
         <CircleBtn
-          borderRadius={50}
           color={Colors.themeColor().background}
-          onPress={() => navigation.navigate("NoteDetails", {
-            title: "sadawda"
-          })}
+          onPress={() => navigation.navigate("NoteDetails")}
+          style={SharedStyles.shadow.elevation5}
         >
-          <Feather name="plus" size={24} color="black" />
+          <Feather name="plus" size={Typography.FONT_SIZE_TITLE_LG} color={Colors.themeColor().textColor} />
         </CircleBtn>
       </View>
     </View>

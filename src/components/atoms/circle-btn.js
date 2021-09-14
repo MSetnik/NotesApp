@@ -9,18 +9,21 @@ import { Typography } from "../../styles";
 const CircleBtn = ({
   color,
   children,
-  borderRadius = Typography.FONT_SIZE_TITLE_MD,
-  onPress
+  borderRadius = Typography.FONT_SIZE_TITLE_LG,
+  onPress,
+  style,
+  disabled = false
 }) => {
   const [pressOpacity, setPressOpacity] = useState(1);
   return (
     <Pressable
-      style={{
+      disabled={disabled}
+      style={[style, {
         borderRadius: borderRadius,
         padding: Typography.LINE_HEIGHT_NORMAL / 2,
         backgroundColor: color,
-        opacity: pressOpacity
-      }}
+        opacity: disabled ? 0.3 : pressOpacity
+      }]}
       onPress={onPress}
       onPressIn={() => setPressOpacity(0.5)}
       onPressOut={() => setPressOpacity(1)}

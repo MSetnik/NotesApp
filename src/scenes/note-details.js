@@ -1,20 +1,31 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState, useContext, useEffect } from "react";
 import { View, Text, TextInput, KeyboardAvoidingView, Platform, Pressable, LogBox } from "react-native";
 
 // Styles
-import { Colors, Typography } from "../styles";
+import { Colors, SharedStyles, Typography } from "../styles";
 
 // Components
-import CircleBtn from "../components/atoms/circle-btn";
-import Header from "../components/molecules/header";
+import { CircleBtn } from "../components/atoms";
+import { Header } from "../components/molecules";
 
 // Expo icons
 import { Feather } from "@expo/vector-icons";
+
+// Helpers
 import { dateHelper } from "../helpers";
 
 // Store
 import { StoreContext } from "../store/reducer";
 import { actions, createAction } from "../store/actions";
+
+// Localization
+import { localization } from "../localization";
+
+// Async storage
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// Constants
+import { ASYNC_STORAGE_KEY } from "../constants";
 
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state"
@@ -46,6 +57,30 @@ const NoteDetails = ({ navigation, route }) => {
   const [title, setTitle] = useState(note !== undefined ? note.title : "");
   const [content, setContent] = useState(note !== undefined ? note.content : "");
 
+  // spremanje biljeski kod navigation listenera ne dohvaca izmjenjen state.
+  // WORKAROUND:
+  const noteTitle = useRef(title);
+  const noteContent = useRef(content);
+
+  useEffect(() => {
+    navigation.addListener("blur", () => {
+      if (note !== undefined) {
+        saveNote(true, noteTitle.current, noteContent.current);
+      } else if (noteTitle.current !== "" || noteContent.current !== "") {
+        addNote(true, noteTitle.current, noteContent.current);
+      }
+    });
+  }, []);
+
+  const storeDataAsyncStorage = async (value) => {
+    try {
+      const jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem(ASYNC_STORAGE_KEY, jsonValue);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const getRandomColor = () => {
     let c;
     const index = Math.floor(Math.random() * 6);
@@ -58,7 +93,7 @@ const NoteDetails = ({ navigation, route }) => {
     return c;
   };
 
-  const saveNote = () => {
+  const saveNote = (navigationOnBlur = false, title, content) => {
     const newNotesData = state.notes;
 
     state.notes.forEach((n, index) => {
@@ -72,14 +107,22 @@ const NoteDetails = ({ navigation, route }) => {
 
         };
 
-        newNotesData.splice(index, 1);
-        newNotesData.splice(0, 0, newNoteData);
+        if (newNoteData.id !== n.id || newNoteData.title !== n.title || newNoteData.content !== n.content) {
+          newNotesData.splice(index, 1);
+          newNotesData.splice(0, 0, newNoteData);
 
-        dispatch(createAction(actions.ADD_NOTE, newNotesData));
+          dispatch(createAction(actions.ADD_NOTE, newNotesData));
+
+          storeDataAsyncStorage(newNotesData);
+        }
       }
     });
 
-    navigation.goBack();
+    navigation.removeListener("blur");
+
+    if (!navigationOnBlur) {
+      navigation.goBack();
+    }
   };
 
   const getNextId = () => {
@@ -94,7 +137,7 @@ const NoteDetails = ({ navigation, route }) => {
     return biggestId;
   };
 
-  const addNote = () => {
+  const addNote = (navigationOnBlur = false, title, content) => {
     const newNotesData = state.notes;
     const newNoteData = {
       id: getNextId(),
@@ -105,11 +148,17 @@ const NoteDetails = ({ navigation, route }) => {
 
     };
 
-    newNotesData.splice(0, 0, newNoteData);
+    newNotesData.unshift(newNoteData);
 
     dispatch(createAction(actions.ADD_NOTE, newNotesData));
 
-    navigation.goBack();
+    storeDataAsyncStorage(newNotesData);
+
+    navigation.removeListener("blur");
+
+    if (!navigationOnBlur) {
+      navigation.goBack();
+    }
   };
 
   const deleteNote = () => {
@@ -120,6 +169,8 @@ const NoteDetails = ({ navigation, route }) => {
     });
 
     dispatch(createAction(actions.ADD_NOTE, state.notes));
+
+    storeDataAsyncStorage(state.notes);
 
     navigation.goBack();
   };
@@ -142,7 +193,7 @@ const NoteDetails = ({ navigation, route }) => {
         rightElement={
           <View style={{ flexDirection: "row" }}>
             {
-              note !== undefined && <View style={{ marginRight: 10 }}>
+              note !== undefined && <View style={{ marginRight: Typography.FONT_SIZE_TITLE_MD * 0.5 }}>
                 <CircleBtn
                   color={Colors.themeColor().btnColor}
                   onPress={() => deleteNote()}
@@ -155,10 +206,11 @@ const NoteDetails = ({ navigation, route }) => {
 
             <View>
               <CircleBtn
+                disabled={!!(title === "" && content === "")}
                 color={Colors.themeColor().btnColor}
-                onPress={() => note !== undefined ? saveNote() : addNote()}
+                onPress={() => note !== undefined ? saveNote(false, title, content) : addNote(false, title, content)}
               >
-                <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL }}>Save</Text>
+                <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL }}>{localization("save")}</Text>
               </CircleBtn>
             </View>
 
@@ -169,33 +221,40 @@ const NoteDetails = ({ navigation, route }) => {
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ paddingHorizontal: 20, flex: 1 }}>
-        <TextInput style={{
+        style={{ paddingHorizontal: Typography.FONT_SIZE_TITLE_MD, flex: 1 }}>
+        <TextInput style={[SharedStyles.typography.titleMedium, {
           flexDirection: "row",
-          fontSize: Typography.FONT_SIZE_TITLE_LG,
-          marginTop: 10,
+          marginTop: Typography.FONT_SIZE_TITLE_MD * 0.5,
           fontWeight: "bold"
+        }]}
+        onChangeText={(e) => {
+          noteTitle.current = e;
+          setTitle(e);
         }}
-        onChangeText={(e) => setTitle(e)}
-        placeholder='Title'
+        placeholder={localization("titlePlaceholder")}
         value={title}
         />
 
-        <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL, marginTop: 20, color: "#838383" }}>{note !== undefined ? dateHelper.formatDate(note.date) : dateHelper.formatDate(date)}</Text>
+        <Text style={[SharedStyles.typography.bodySmall, {
+          marginTop: Typography.FONT_SIZE_TITLE_MD,
+          color: "#838383"
+        }]}>
+          {note !== undefined ? dateHelper.formatDate(note.date) : dateHelper.formatDate(date)}
+        </Text>
 
-        <View style={{ flex: 1, marginTop: 10 }} >
+        <View style={{ flex: 1, marginTop: Typography.FONT_SIZE_TITLE_MD * 0.5 }} >
           <Pressable style={{ flex: 1 }} onPress={() => {
             editText.current.focus();
           }}>
             <TextInput
               ref={editText}
               multiline={true}
-              style={{
-                fontSize: Typography.FONT_SIZE_TITLE_LG,
-                fontWeight: "bold"
+              style={SharedStyles.typography.bodyMedum}
+              onChangeText={(e) => {
+                noteContent.current = e;
+                setContent(e);
               }}
-              onChangeText={(e) => setContent(e)}
-              placeholder="Type something ..."
+              placeholder={localization("contentPlaceholder")}
               value={content}
             />
           </Pressable>

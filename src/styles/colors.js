@@ -8,7 +8,10 @@ export const darkTheme = {
   card5: "#8AC7F2",
   card6: "#EFC8DB",
   btnColor: "#EAEAEA",
-  error: "#db0f0f"
+  error: "#db0f0f",
+  textColor: "#FFFFFF",
+  textColorSecondary: "#000000",
+  backgroundSecondary: "#F7F7F7"
 
 };
 
@@ -21,7 +24,10 @@ export const lightTheme = {
   card5: "#8AC7F2",
   card6: "#EFC8DB",
   btnColor: "#EAEAEA",
-  error: "#db0f0f"
+  error: "#DB0F0F",
+  textColor: "#000000",
+  textColorSecondary: "#FFFFFF",
+  backgroundSecondary: "#F7F7F7"
 };
 
 // Color theme selector

@@ -9,7 +9,7 @@ const Header = ({ leftElement, rightElement }) => {
       justifyContent: "space-between",
       marginHorizontal: Typography.FONT_SIZE_TITLE_MD,
       alignItems: "center",
-      marginBottom: Typography.FONT_SIZE_TITLE_MD * 0.5
+      marginBottom: Typography.FONT_SIZE_TITLE_MD
     }}>
       {leftElement}
       {rightElement}
