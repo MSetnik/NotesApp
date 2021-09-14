@@ -27,8 +27,10 @@ export default function App () {
 
         if (value !== null) {
           dispatch(createAction(actions.ADD_NOTE, JSON.parse(value)));
+          dispatch(createAction(actions.END_LOADER));
         } else {
           dispatch(createAction(actions.ADD_NOTE, []));
+          dispatch(createAction(actions.END_LOADER));
         }
       } catch (e) {
         console.log(e);

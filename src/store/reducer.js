@@ -14,6 +14,12 @@ export const reducer = (state = initialState, action) => {
         isLoading: true
       };
 
+    case actions.END_LOADER:
+      return {
+        ...state,
+        isLoading: false
+      };
+
     case actions.ADD_NOTE:
       return {
         ...state,

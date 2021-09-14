@@ -4,11 +4,11 @@
     "slug": "NotesApp",
     "version": "1.2.0",
     "orientation": "portrait",
-    "icon": "./assets/notes-icon.png",
+    "icon": "./assets/notes-icon3.png",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/splashscreen.png",
+      "resizeMode": "contain" ,
+      "backgroundColor": "#F2F2F2"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -22,8 +22,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/notes-icon3.png",
+        "backgroundColor": "#88B6E1"
       },
       "package": "com.msetnik.NotesApp"
     },

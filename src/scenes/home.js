@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useRef } from "react";
-import { View, Text, FlatList } from "react-native";
+import React, { useContext } from "react";
+import { View, Text, FlatList, ActivityIndicator } from "react-native";
 
 // Component
 import { NoteCard, Header } from "../components/molecules";
@@ -65,6 +65,14 @@ const Home = ({ navigation }) => {
     key = item.id.toString();
     return key;
   };
+
+  if (store.state.isLoading) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: Colors.themeColor().background, paddingTop: Typography.FONT_SIZE_TITLE_LG * 2 }}>
