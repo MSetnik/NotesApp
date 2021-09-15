@@ -9,7 +9,7 @@ import { Typography } from "../../styles";
 const CircleBtn = ({
   color,
   children,
-  borderRadius = Typography.FONT_SIZE_TITLE_LG,
+  borderRadius = Typography.FONT_SIZE_TITLE_LG * 2,
   onPress,
   style,
   disabled = false

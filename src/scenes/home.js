@@ -1,6 +1,9 @@
 import React, { useContext } from "react";
 import { View, Text, FlatList, ActivityIndicator } from "react-native";
 
+// Status Bar
+import { StatusBar } from "expo-status-bar";
+
 // Component
 import { NoteCard, Header } from "../components/molecules";
 import { CircleBtn, NoDataMessage } from "../components/atoms";
@@ -15,11 +18,11 @@ import { StoreContext } from "../store/reducer";
 // Localization
 import { localization } from "../localization";
 
-const SETTINGS = false;
+const SETTINGS = true;
 
 const Home = ({ navigation }) => {
   const store = useContext(StoreContext);
-
+  const state = store.state;
   const notes = store.state.notes;
 
   // Formatiranje JSON podataka za ispis
@@ -75,16 +78,17 @@ const Home = ({ navigation }) => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.themeColor().background, paddingTop: Typography.FONT_SIZE_TITLE_LG * 2 }}>
+    <View style={{ flex: 1, backgroundColor: Colors.themeColor(state.theme).background, paddingTop: Typography.FONT_SIZE_TITLE_LG * 2 }}>
+      <StatusBar style={state.theme === "light" ? "dark" : "light"}/>
       <Header
         leftElement={
-          <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL * 2 }}>{localization("notes")}</Text>
+          <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL * 2, color: Colors.themeColor(state.theme).textColor }}>{localization("notes")}</Text>
         }
 
         rightElement={SETTINGS && <CircleBtn
-          color={Colors.themeColor().btnColor}
+          color={Colors.themeColor(state.theme).btnColor}
           onPress={() => navigation.navigate("Settings")}>
-          <Feather name="settings" size={Typography.FONT_SIZE_TITLE_MD} color="black" />
+          <Feather name="settings" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />
         </CircleBtn> }
       />
 
@@ -95,7 +99,7 @@ const Home = ({ navigation }) => {
           renderItem={renderItem}
           keyExtractor={(item) => keyExtractor(item)}
         /> : <NoDataMessage
-          icon={<Feather name="alert-octagon" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor().textColor} />}
+          icon={<Feather name="alert-octagon" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />}
           text={localization("noDataText")}
           style={{ marginTop: Typography.FONT_SIZE_TITLE_MD }}
           textStyle={{ marginLeft: Typography.FONT_SIZE_TITLE_MD * 0.5 }}/>
@@ -103,11 +107,11 @@ const Home = ({ navigation }) => {
 
       <View style={[{ position: "absolute", bottom: Typography.FONT_SIZE_TITLE_MD * 2, right: Typography.FONT_SIZE_TITLE_MD * 2 }, SharedStyles.shadow.elevation5]}>
         <CircleBtn
-          color={Colors.themeColor().background}
+          color={Colors.themeColor(state.theme).addNoteBtn}
           onPress={() => navigation.navigate("NoteDetails")}
-          style={SharedStyles.shadow.elevation5}
+          style={[SharedStyles.shadow.elevation5]}
         >
-          <Feather name="plus" size={Typography.FONT_SIZE_TITLE_LG} color={Colors.themeColor().textColor} />
+          <Feather name="plus" size={Typography.FONT_SIZE_TITLE_LG} color={Colors.themeColor(state.theme).textColor} />
         </CircleBtn>
       </View>
     </View>

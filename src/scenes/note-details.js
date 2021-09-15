@@ -178,27 +178,27 @@ const NoteDetails = ({ navigation, route }) => {
   return (
     <View style={{
       flex: 1,
-      backgroundColor: Colors.themeColor().background,
+      backgroundColor: Colors.themeColor(state.theme).background,
       paddingTop: Typography.FONT_SIZE_TITLE_LG * 2
     }}>
       <Header
         leftElement={
           <CircleBtn
-            color={Colors.themeColor().btnColor}
+            color={Colors.themeColor(state.theme).btnColor}
             onPress={() => navigation.goBack()}
           >
-            <Feather name="chevron-left" size={Typography.FONT_SIZE_TITLE_MD} color="black" />
+            <Feather name="chevron-left" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />
           </CircleBtn>
         }
         rightElement={
-          <View style={{ flexDirection: "row" }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             {
               note !== undefined && <View style={{ marginRight: Typography.FONT_SIZE_TITLE_MD * 0.5 }}>
                 <CircleBtn
-                  color={Colors.themeColor().btnColor}
+                  color={Colors.themeColor(state.theme).btnColor}
                   onPress={() => deleteNote()}
                 >
-                  <Feather name="trash-2" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor().error} />
+                  <Feather name="trash-2" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).error} />
                 </CircleBtn>
 
               </View>
@@ -207,10 +207,10 @@ const NoteDetails = ({ navigation, route }) => {
             <View>
               <CircleBtn
                 disabled={!!(title === "" && content === "")}
-                color={Colors.themeColor().btnColor}
+                color={Colors.themeColor(state.theme).btnColor}
                 onPress={() => note !== undefined ? saveNote(false, title, content) : addNote(false, title, content)}
               >
-                <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL }}>{localization("save")}</Text>
+                <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL, color: Colors.themeColor(state.theme).textColor }}>{localization("save")}</Text>
               </CircleBtn>
             </View>
 
@@ -225,19 +225,21 @@ const NoteDetails = ({ navigation, route }) => {
         <TextInput style={[SharedStyles.typography.titleMedium, {
           flexDirection: "row",
           marginTop: Typography.FONT_SIZE_TITLE_MD * 0.5,
-          fontWeight: "bold"
+          fontWeight: "bold",
+          color: Colors.themeColor(state.theme).textColor
         }]}
         onChangeText={(e) => {
           noteTitle.current = e;
           setTitle(e);
         }}
+        placeholderTextColor={Colors.themeColor(state.theme).btnColor}
         placeholder={localization("titlePlaceholder")}
         value={title}
         />
 
         <Text style={[SharedStyles.typography.bodySmall, {
           marginTop: Typography.FONT_SIZE_TITLE_MD,
-          color: "#838383"
+          color: Colors.themeColor(state.theme).dateColor
         }]}>
           {note !== undefined ? dateHelper.formatDate(note.date) : dateHelper.formatDate(date)}
         </Text>
@@ -249,13 +251,14 @@ const NoteDetails = ({ navigation, route }) => {
             <TextInput
               ref={editText}
               multiline={true}
-              style={SharedStyles.typography.bodyMedum}
+              style={[SharedStyles.typography.bodyMedum, { color: Colors.themeColor(state.theme).textColor }]}
               onChangeText={(e) => {
                 noteContent.current = e;
                 setContent(e);
               }}
               placeholder={localization("contentPlaceholder")}
               value={content}
+              placeholderTextColor={ Colors.themeColor(state.theme).btnColor}
             />
           </Pressable>
 

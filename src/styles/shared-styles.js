@@ -119,7 +119,7 @@ export const shadow = StyleSheet.create({
   },
   elevation5: {
     elevation: 5,
-    shadowColor: Colors.themeColor().textColor,
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2

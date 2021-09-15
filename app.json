@@ -2,12 +2,12 @@
   "expo": {
     "name": "Notes",
     "slug": "NotesApp",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "orientation": "portrait",
     "icon": "./assets/notes-icon6.png",
     "splash": {
       "image": "./assets/splashscreen.png",
-      "resizeMode": "contain" ,
+      "resizeMode": "cover" ,
       "backgroundColor": "#F2F2F2"
     },
     "updates": {

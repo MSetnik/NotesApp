@@ -20,6 +20,12 @@ export const reducer = (state = initialState, action) => {
         isLoading: false
       };
 
+    case actions.SET_THEME:
+      return {
+        ...state,
+        theme: action.payload
+      };
+
     case actions.ADD_NOTE:
       return {
         ...state,
