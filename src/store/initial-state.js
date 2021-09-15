@@ -1,5 +1,7 @@
 import { data } from "../assets/dummy-data";
 
 export const initialState = {
-  notes: data
+  notes: [],
+  isLoading: true,
+  theme: "light"
 };

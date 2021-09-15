@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import { Typography } from "../../styles";
+import { SharedStyles, Typography } from "../../styles";
 
 // Helpers
 import { dateHelper } from "../../helpers";
@@ -17,7 +17,7 @@ const NoteCard = ({
           style={[styles.cardShort, { backgroundColor: item[0].color }]}
           onPress={() => navigation.navigate("NoteDetails", { item: item[0] })}
         >
-          <Text style={styles.noteTitle} numberOfLines={3}>{item[0].title !== "" ? item[0].title : item[0].content}</Text>
+          <Text style={[SharedStyles.typography.titleNormal, styles.noteTitle, { fontWeight: item[0].title !== "" ? "bold" : "normal" }]} numberOfLines={3}>{item[0].title !== "" ? item[0].title : item[0].content}</Text>
 
           <Text style={{ justifyContent: "flex-end" }}>{dateHelper.formatDate(item[0].date)}</Text>
         </Pressable>
@@ -28,7 +28,7 @@ const NoteCard = ({
             style={[styles.cardShort, { backgroundColor: item[1].color }]}
             onPress={() => navigation.navigate("NoteDetails", { item: item[1] })}
           >
-            <Text style={styles.noteTitle} numberOfLines={3}>{item[1].title !== "" ? item[1].title : item[1].content}</Text>
+            <Text style={[SharedStyles.typography.titleNormal, styles.noteTitle, { fontWeight: item[1].title !== "" ? "bold" : "normal" }]} numberOfLines={3}>{item[1].title !== "" ? item[1].title : item[1].content}</Text>
 
             <Text style={{ justifyContent: "flex-end" }}>{dateHelper.formatDate(item[1].date)}</Text>
           </Pressable>
@@ -44,7 +44,7 @@ const NoteCard = ({
           style={[styles.cardLong, { backgroundColor: item.color }]}
           onPress={() => navigation.navigate("NoteDetails", { item: item })}
         >
-          <Text style={styles.noteTitle} numberOfLines={3}>{item.title !== "" ? item.title : item.content}</Text>
+          <Text style={[SharedStyles.typography.titleNormal, styles.noteTitle, { fontWeight: item.title !== "" ? "bold" : "normal" }]} numberOfLines={3}>{item.title !== "" ? item.title : item.content}</Text>
 
           <Text style={{ justifyContent: "flex-end" }}>{dateHelper.formatDate(item.date)}</Text>
         </Pressable>
@@ -63,8 +63,7 @@ const styles = StyleSheet.create({
     padding: 14
   },
   noteTitle: {
-    flex: 1,
-    fontSize: Typography.FONT_SIZE_TITLE_MD
+    flex: 1
   },
   cardLong: {
     width: "95%",

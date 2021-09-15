@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "NotesApp",
+    "name": "Notes",
     "slug": "NotesApp",
-    "version": "1.1.2",
+    "version": "1.2.1",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/notes-icon6.png",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "image": "./assets/splashscreen.png",
+      "resizeMode": "cover" ,
+      "backgroundColor": "#F2F2F2"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -17,13 +17,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.msetnik.NotesApp"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      }
+        "foregroundImage": "./assets/notes-icon6.png",
+        "backgroundColor": "#88B6E1"
+      },
+      "package": "com.msetnik.NotesApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
