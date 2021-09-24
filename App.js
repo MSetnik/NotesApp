@@ -37,6 +37,7 @@ export default function App () {
           dispatch(createAction(actions.END_LOADER));
         } else {
           dispatch(createAction(actions.ADD_NOTE, []));
+          dispatch(createAction(actions.SET_THEME, theme));
           dispatch(createAction(actions.END_LOADER));
         }
       } catch (e) {
