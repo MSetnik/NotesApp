@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { View, Text, FlatList, ActivityIndicator } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, Pressable } from "react-native";
 
 // Status Bar
 import { StatusBar } from "expo-status-bar";
@@ -98,20 +98,23 @@ const Home = ({ navigation }) => {
           data={data1()}
           renderItem={renderItem}
           keyExtractor={(item) => keyExtractor(item)}
-        /> : <NoDataMessage
-          icon={<Feather name="alert-octagon" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />}
-          text={localization("noDataText")}
-          style={{ marginTop: Typography.FONT_SIZE_TITLE_MD }}
-          textStyle={{ marginLeft: Typography.FONT_SIZE_TITLE_MD * 0.5 }}/>
+        /> : <Pressable onPress={() => navigation.navigate("NoteDetails")}>
+          <NoDataMessage
+            icon={<Feather name="alert-octagon" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />}
+            text={localization("noDataText")}
+            style={{ marginTop: Typography.FONT_SIZE_TITLE_MD }}
+            textStyle={{ marginLeft: Typography.FONT_SIZE_TITLE_MD * 0.5 }}/>
+        </Pressable>
+
       }
 
       <View style={[{ position: "absolute", bottom: Typography.FONT_SIZE_TITLE_MD * 2, right: Typography.FONT_SIZE_TITLE_MD * 2 }, SharedStyles.shadow.elevation5]}>
         <CircleBtn
-          color={Colors.themeColor(state.theme).addNoteBtn}
+          color={Colors.themeColor(state.theme).secondary}
           onPress={() => navigation.navigate("NoteDetails")}
-          style={[SharedStyles.shadow.elevation5]}
+          style={[SharedStyles.shadow.elevation5, { padding: Typography.FONT_SIZE_TITLE_LG / 1.15 }]}
         >
-          <Feather name="plus" size={Typography.FONT_SIZE_TITLE_LG} color={Colors.themeColor(state.theme).textColor} />
+          <Feather name="plus" size={Typography.FONT_SIZE_TITLE_LG} color={Colors.themeColor("dark").textColor} />
         </CircleBtn>
       </View>
     </View>

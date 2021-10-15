@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { StyleSheet, Text, View, Switch, Platform } from "react-native";
+import { StyleSheet, Text, View, Switch, Platform, Pressable } from "react-native";
 
 // Constants
 import Constants from "expo-constants";
@@ -24,6 +24,14 @@ import { actions, createAction } from "../store/actions";
 // Async Storage
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Firebase Auth
+
+import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged, FacebookAuthProvider, signInWithCredential } from "firebase/auth";
+import { firebaseConfig } from "../firebase-config";
+
+import { LoginModal } from "../components/organisms";
+
 const appVersion = Constants.manifest.version;
 
 const Settings = ({ navigation }) => {
@@ -32,6 +40,63 @@ const Settings = ({ navigation }) => {
   const dispatch = store.dispatch;
 
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(state.theme !== "light");
+
+  const [user, setUser] = useState();
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // initializeApp(firebaseConfig);
+
+  // const auth = getAuth();
+
+  // // Listen for authentication state to change.
+  // onAuthStateChanged(auth, (user) => {
+  //   if (user != null) {
+  //     console.log("We are authenticated now!");
+  //   }
+
+  // // Do other things
+  // });
+  function onAuthStateChanged (user) {
+    setUser(user);
+    // if (initializing) setInitializing(false);
+  }
+
+  // auth()
+  // .createUserWithEmailAndPassword('jane.doe@example.com', 'SuperSecretPassword!')
+  // .then(() => {
+  //   console.log('User account created & signed in!');
+  // })
+  // .catch(error => {
+  //   if (error.code === 'auth/email-already-in-use') {
+  //     console.log('That email address is already in use!');
+  //   }
+
+  //   if (error.code === 'auth/invalid-email') {
+  //     console.log('That email address is invalid!');
+  //   }
+
+  //   console.error(error);
+  // });
+
+  // async function loginWithFacebook () {
+  //   await Facebook.initializeAsync("<FACEBOOK_APP_ID>");
+
+  //   const { type, token } = await Facebook.logInWithReadPermissionsAsync({
+  //     permissions: ["public_profile"]
+  //   });
+
+  //   if (type === "success") {
+  //   // Build Firebase credential with the Facebook access token.
+  //     const facebookAuthProvider = new FacebookAuthProvider();
+  //     const credential = facebookAuthProvider.credential(token);
+
+  //     // Sign in with credential from the Facebook user.
+  //     signInWithCredential(auth, credential)
+  //       .catch(error => {
+  //       // Handle Errors here.
+  //       });
+  //   }
+  // }
 
   const toggleSwitch = (switchState) => {
     setIsDarkModeEnabled(!isDarkModeEnabled);
@@ -58,6 +123,7 @@ const Settings = ({ navigation }) => {
       paddingTop: Typography.FONT_SIZE_TITLE_LG * 2,
       backgroundColor: Colors.themeColor(state.theme).background
     }]}>
+
       <Header
         leftElement={
           <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -98,9 +164,17 @@ const Settings = ({ navigation }) => {
             <Text style={[SharedStyles.typography.bodyMedum, { color: Colors.themeColor(state.theme).textColor, marginRight: Typography.FONT_SIZE_TITLE_MD * 0.5 }]}>{appVersion}</Text>
           </View>
         </View>
+        <Text style={[SharedStyles.typography.subtitle, styles.subTitle, { color: Colors.themeColor(state.theme).textColor }]}>Login</Text>
+        <View style={styles.dataContainer}>
+          <View style={[styles.dataItem, { color: Colors.themeColor(state.theme).textColor, borderColor: Colors.themeColor(state.theme).textColor }]}>
+            <Pressable style={{ flexDirection: "row", flex: 1 }} onPress={() => navigation.navigate("Login")}>
+              <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>Login</Text>
+            </Pressable>
+          </View>
+        </View>
       </View>
-    </View>
 
+    </View>
   );
 };
 
