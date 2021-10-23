@@ -1,4 +1,6 @@
-import { initializeApp } from "firebase/app";
+
+import firebase from "firebase/app";
+import "firebase/auth";
 
 // Optionally import the services that you want to use
 // import {...} from "firebase/auth";
@@ -8,7 +10,7 @@ import { initializeApp } from "firebase/app";
 // import {...} from "firebase/storage";
 
 // Initialize Firebase
-export const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyBslgMLjCgEz9njMHquIKbCJVdahShT-wM",
   authDomain: "notesapp-d5fa2.firebaseapp.com",
   databaseURL: "https://notesapp-d5fa2-default-rtdb.europe-west1.firebasedatabase.app",
@@ -20,3 +22,11 @@ export const firebaseConfig = {
 };
 
 // initializeApp(firebaseConfig);
+
+let Firebase;
+
+if (firebase.apps.length === 0) {
+  Firebase = firebase.initializeApp(firebaseConfig);
+}
+
+export default Firebase;
