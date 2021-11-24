@@ -8,7 +8,11 @@ const en = {
   theme: "Theme",
   darkMode: "Dark mode",
   appVersion: "App version",
-  about: "About"
+  about: "About",
+  emailErrorMsg: "Email is not correct format",
+  emailInUseMsg: "Email is already in use",
+  passwordErrorMsg: "Password must be at least 6 characters",
+  confirmPasswordErrorMsg: "Passwords must match"
 
 };
 

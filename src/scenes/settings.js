@@ -24,13 +24,8 @@ import { actions, createAction } from "../store/actions";
 // Async Storage
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Firebase Auth
-
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged, FacebookAuthProvider, signInWithCredential } from "firebase/auth";
-import { firebaseConfig } from "../firebase-config";
-
-import { LoginModal } from "../components/organisms";
+// Firebase
+import Firebase from "../firebase-config";
 
 const appVersion = Constants.manifest.version;
 
@@ -98,6 +93,12 @@ const Settings = ({ navigation }) => {
   //   }
   // }
 
+  const logout = () => {
+    Firebase.auth()
+      .signOut()
+      .then(() => console.log("User signed out!"));
+  };
+
   const toggleSwitch = (switchState) => {
     setIsDarkModeEnabled(!isDarkModeEnabled);
 
@@ -164,11 +165,11 @@ const Settings = ({ navigation }) => {
             <Text style={[SharedStyles.typography.bodyMedum, { color: Colors.themeColor(state.theme).textColor, marginRight: Typography.FONT_SIZE_TITLE_MD * 0.5 }]}>{appVersion}</Text>
           </View>
         </View>
-        <Text style={[SharedStyles.typography.subtitle, styles.subTitle, { color: Colors.themeColor(state.theme).textColor }]}>Login</Text>
+        <Text style={[SharedStyles.typography.subtitle, styles.subTitle, { color: Colors.themeColor(state.theme).textColor }]}>User</Text>
         <View style={styles.dataContainer}>
           <View style={[styles.dataItem, { color: Colors.themeColor(state.theme).textColor, borderColor: Colors.themeColor(state.theme).textColor }]}>
-            <Pressable style={{ flexDirection: "row", flex: 1 }} onPress={() => navigation.navigate("Login")}>
-              <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>Login</Text>
+            <Pressable style={{ flexDirection: "row", flex: 1 }} onPress={() => logout()}>
+              <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>Logout</Text>
             </Pressable>
           </View>
         </View>

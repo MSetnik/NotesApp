@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Pressable, Text, TextInput, View, KeyboardAvoidingView } from "react-native";
+import { Pressable, Text, TextInput, View, KeyboardAvoidingView, Alert } from "react-native";
 
 // Constants
 import Constants from "expo-constants";
@@ -24,6 +24,7 @@ import { actions, createAction } from "../store/actions";
 // import { firebaseConfig } from "../firebase-config";
 // import { getAuth, onAuthStateChanged, FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 import Firebase from "../firebase-config";
+import { localization } from "../localization";
 
 const Register = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -31,8 +32,10 @@ const Register = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   // Errors
-  const [passwordError, setPasswordError] = useState(false);
-  const [passwordErrorMsg, setPasswordErrorMsg] = useState(false);
+  const [passwordError, setPasswordError] = useState(null);
+  const [confirmPasswordError, setConfirmPasswordError] = useState(null);
+  const [passwordErrorMsg, setPasswordErrorMsg] = useState("");
+  const [emailError, setEmailError] = useState(null);
 
   const store = useContext(StoreContext);
   const state = store.state;
@@ -40,73 +43,98 @@ const Register = ({ navigation }) => {
   // firebase.initializeApp(firebaseConfig);
   const auth = Firebase.auth();
 
-  const onHandleSignup = async () => {
-    console.log(email);
-
-    // console.log(email.match("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*)@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)])"));
-    // console.log(/(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))/g.test('matko@mail.com'))
-    // console.log(/^([a-z0-9]{5,})$/.test("abc1")); // false
-
-    const validateEmail = () => {
-      const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      if (reg.test(email) === false) {
-        console.log("Email is Not Correct");
-        return false;
-      } else {
-        console.log("Email is Correct");
-        return true;
-      }
-    };
-
-    console.log(validateEmail("matko@mail.com"));
-    //   switch (password) {
-    //     case password < 6:
-    //       setPasswordErrorMsg("Password must be at least 6 characters");
-    //       setPasswordError(true);
-    //       break;
-
-    //     case password !== confirmPassword:
-    //       setPasswordErrorMsg("Passwords must match");
-    //       setPasswordError(true);
-    //   }
-
-    //   // if (password !== confirmPassword) {
-    //   //   setPasswordError(true);
-    //   //   return;
-    //   // }
-
-  //   try {
-  //     if (email !== "" && password !== "") {
-  //       await auth.createUserWithEmailAndPassword(email, password);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  };
-
-  const register = () => {
-    if (password === confirmPassword) {
-      // console.log(firebase.auth());
-      // auth()
-      //   .createUserWithEmailAndPassword(email, password)
-      //   .then(() => {
-      //     console.log("User account created & signed in!");
-      //   })
-      //   .catch(error => {
-      //     if (error.code === "auth/email-already-in-use") {
-      //       console.log("That email address is already in use!");
-      //     }
-
-      //     if (error.code === "auth/invalid-email") {
-      //       console.log("That email address is invalid!");
-      //     }
-
-      //     console.error(error);
-      //   });
+  const validateEmail = () => {
+    const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if (reg.test(email) === false) {
+      setEmailError(true);
+      return false;
     } else {
-      setPasswordError(true);
+      setEmailError(false);
+      return true;
     }
   };
+
+  const onHandleSignup = async () => {
+    const emailValid = validateEmail();
+
+    if (!validateEmail()) {
+      return;
+    }
+
+    if (password.length === 0 || confirmPassword.length === 0) {
+      setPasswordError(true);
+      setConfirmPasswordError(true);
+      return;
+    }
+
+    if (password.length <= 6) {
+      console.log("manje od 6");
+      setPasswordErrorMsg(localization("passwordErrorMsg"));
+      setPasswordError(true);
+      return;
+    } else {
+      setPasswordError(false);
+    }
+
+    if (password !== confirmPassword) {
+      console.log("Nije isto");
+      setPasswordErrorMsg(localization("confirmPasswordErrorMsg"));
+      setConfirmPasswordError(true);
+      return;
+    } else {
+      setConfirmPasswordError(false);
+    }
+
+    try {
+      if (email !== "" && password !== "") {
+        console.log("success");
+        await auth.createUserWithEmailAndPassword(email, password)
+          .then(resp => {
+            console.log(resp);
+            if (resp.user !== null) {
+              navigation.navigate("Home");
+            }
+          });
+      }
+    } catch (error) {
+      console.log(error.code);
+      if (error.code === "auth/email-already-in-use") {
+        alert(localization("emailInUseMsg"));
+      }
+
+      if (error.code === "auth/invalid-email") {
+        alert(localization("emailErrorMsg"));
+      }
+      // console.error(error);
+      // console.log("fail");
+      // alert(error);
+      // console.log(error);
+    }
+  };
+
+  // const register = () => {
+  //   if (password === confirmPassword) {
+  //     // console.log(firebase.auth());
+  //     // auth()
+  //     //   .createUserWithEmailAndPassword(email, password)
+  //     //   .then(() => {
+  //     //     console.log("User account created & signed in!");
+  //     //   })
+  //     //   .catch(error => {
+  //     //     if (error.code === "auth/email-already-in-use") {
+  //     //       console.log("That email address is already in use!");
+  //     //     }
+
+  //     //     if (error.code === "auth/invalid-email") {
+  //     //       console.log("That email address is invalid!");
+  //     //     }
+
+  //     //     console.error(error);
+  //     //   });
+  //   } else {
+  //     setPasswordError(true);
+  //   }
+  // };
 
   return (
     <View style={{ flex: 1, paddingTop: Constants.statusBarHeight + 20, alignItems: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
@@ -124,19 +152,35 @@ const Register = ({ navigation }) => {
               E-Mail
             </Text>
 
-            <AntDesign name="exclamationcircleo" size={20} color={Colors.themeColor(state.theme).warning} />
+            {
+              emailError !== null ? !emailError ? <AntDesign
+                name="checkcircleo"
+                size={20}
+                color={Colors.themeColor(state.theme).success}
+              /> : <AntDesign
+                name="exclamationcircleo"
+                size={20}
+                color={Colors.themeColor(state.theme).warning}
+              /> : null
+            }
+
           </View>
 
           <TextInput
             onChangeText={setEmail}
-            placeholder='pero.peric@mail.com'
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
             style={[SharedStyles.typography.button, {
               borderBottomWidth: 1,
-              borderColor: Colors.themeColor(state.theme).warning,
+              borderColor: emailError !== null ? !emailError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
+
               color: Colors.themeColor(state.theme).textColor
 
             }]} />
+
+          {
+            emailError && <Text style={ { color: Colors.themeColor(state.theme).textColor }}>{localization("emailErrorMsg")}</Text>
+          }
+
         </View>
 
         <View style={{ marginBottom: 20 }}>
@@ -145,22 +189,31 @@ const Register = ({ navigation }) => {
              Password
             </Text>
 
-            <AntDesign name="exclamationcircleo" size={20} color={Colors.themeColor(state.theme).warning}/>
+            {
+              passwordError !== null ? !passwordError ? <AntDesign
+                name="checkcircleo"
+                size={20}
+                color={Colors.themeColor(state.theme).success}
+              /> : <AntDesign
+                name="exclamationcircleo"
+                size={20}
+                color={Colors.themeColor(state.theme).warning}
+              /> : null
+            }
 
           </View>
 
           <TextInput
             onChangeText={setPassword}
-            placeholder='********'
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
             style={[SharedStyles.typography.button, {
               borderBottomWidth: 1,
-              borderColor: Colors.themeColor(state.theme).warning,
+              borderColor: passwordError !== null ? !passwordError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
               color: Colors.themeColor(state.theme).textColor
             }]} />
 
           {
-            passwordError && <Text>Password doesnt match</Text>
+            passwordError && <Text style={ { color: Colors.themeColor(state.theme).textColor }}>{passwordErrorMsg}</Text>
           }
 
         </View>
@@ -170,20 +223,30 @@ const Register = ({ navigation }) => {
             <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
              Confirm Password
             </Text>
-            <AntDesign name="exclamationcircleo" size={20} color={Colors.themeColor(state.theme).warning}/>
+            {
+              confirmPasswordError !== null ? !confirmPasswordError ? <AntDesign
+                name="checkcircleo"
+                size={20}
+                color={Colors.themeColor(state.theme).success}
+              /> : <AntDesign
+                name="exclamationcircleo"
+                size={20}
+                color={Colors.themeColor(state.theme).warning}
+              /> : null
+            }
           </View>
 
           <TextInput
             onChangeText={setConfirmPassword}
-            placeholder='********'
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
             style={[SharedStyles.typography.button, {
               borderBottomWidth: 1,
-              borderColor: Colors.themeColor(state.theme).warning,
+              borderColor: confirmPasswordError !== null ? !confirmPasswordError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
+
               color: Colors.themeColor(state.theme).textColor
             }]} />
           {
-            passwordError && <Text>Password doesnt match</Text>
+            confirmPasswordError && <Text style={ { color: Colors.themeColor(state.theme).textColor }}>{passwordErrorMsg}</Text>
           }
         </View>
         <CircleBtn

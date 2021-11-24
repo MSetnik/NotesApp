@@ -20,12 +20,36 @@ import { LinearGradient } from "expo-linear-gradient";
 import { StoreContext } from "../store/reducer";
 import { actions, createAction } from "../store/actions";
 
+// Firebase
+import Firebase from "../firebase-config";
+
+// Localization
+import { localization } from "../localization";
+
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const store = useContext(StoreContext);
   const state = store.state;
+
+  const auth = Firebase.auth();
+
+  const onHandleSignup = async () => {
+    try {
+      if (email !== "" && password !== "") {
+        console.log("success");
+        await auth.signInWithEmailAndPassword(email, password)
+          .then(resp => {
+            console.log(resp);
+          });
+      }
+    } catch (error) {
+      console.log("fail");
+      alert(error);
+      console.log(error);
+    }
+  };
 
   return (
     <View style={{ flex: 1, paddingTop: Constants.statusBarHeight + 20, alignItems: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
@@ -47,7 +71,7 @@ const Login = ({ navigation }) => {
           </View>
 
           <TextInput
-            onChange={setEmail}
+            onChangeText={setEmail}
             placeholder='pero.peric@mail.com'
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
             style={[SharedStyles.typography.button, {
@@ -70,7 +94,7 @@ const Login = ({ navigation }) => {
           </View>
 
           <TextInput
-            onChange={setPassword}
+            onChangeText={setPassword}
             placeholder='********'
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
             style={[SharedStyles.typography.button, {
@@ -83,7 +107,9 @@ const Login = ({ navigation }) => {
             Your Password is incorect
           </Text>
         </View>
-        <CircleBtn color={Colors.themeColor("light").primary} style={{ marginTop: 20, justifyContent: "center", alignItems: "center" }}>
+        <CircleBtn color={Colors.themeColor("light").primary} style={{ marginTop: 20, justifyContent: "center", alignItems: "center" }}
+          onPress={() => onHandleSignup()}
+        >
           <Text style={[SharedStyles.typography.button, { color: Colors.themeColor("dark").textColor }]}>Login</Text>
 
         </CircleBtn>
@@ -109,7 +135,7 @@ const Login = ({ navigation }) => {
             marginBottom: 10,
             color: Colors.themeColor(state.theme).textColor
           }}>or</Text>
-          <Pressable>
+          <Pressable onPress={() => navigation.navigate("Home")}>
             <Text style={[SharedStyles.typography.titleNormal, {
               fontWeight: "bold",
               color: Colors.themeColor(state.theme).textColor
