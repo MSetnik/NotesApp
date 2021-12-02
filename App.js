@@ -1,12 +1,13 @@
-import React, { useEffect, useReducer } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 
-import { useColorScheme } from "react-native";
+import { ActivityIndicator, useColorScheme, View } from "react-native";
 
 // React navigation
 import { NavigationContainer } from "@react-navigation/native";
 
 // Routes
-import StackNavigation from "./src/routes/stack-navigation";
+import HomeStack from "./src/routes/home-stack";
+import LoginStack from "./src/routes/login-stack";
 
 // Reducers
 import { initialState } from "./src/store/initial-state";
@@ -18,6 +19,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Constants
 import { ASYNC_STORAGE_KEY, THEME_KEY } from "./src/constants";
+
+// Firebase
+import Firebase from "./src/firebase-config";
+import { Colors } from "./src/styles";
 
 export default function App () {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -48,10 +53,44 @@ export default function App () {
     getDataAsyncStorage();
   }, []);
 
+  // Set an initializing state whilst Firebase connects
+  const [initializing, setInitializing] = useState(true);
+
+  // Handle user state changes
+  function onAuthStateChanged (user) {
+    if (user !== null) {
+      dispatch(createAction(actions.USER_LOGIN, user.email));
+    }
+    if (initializing) setInitializing(false);
+  }
+
+  useEffect(() => {
+    const subscriber = Firebase.auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
+  }, []);
+
+  if (initializing) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
+        <ActivityIndicator size="large" color={Colors.themeColor(state.theme).secondary} />
+      </View>
+    );
+  }
+
+  if (!state.user) {
+    return (
+      <StoreContext.Provider value={{ dispatch, state }}>
+        <NavigationContainer>
+          <LoginStack/>
+        </NavigationContainer>
+      </StoreContext.Provider>
+    );
+  }
+
   return (
     <StoreContext.Provider value={{ dispatch, state }}>
       <NavigationContainer>
-        <StackNavigation/>
+        <HomeStack/>
       </NavigationContainer>
     </StoreContext.Provider>
   );

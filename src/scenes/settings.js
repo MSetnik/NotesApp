@@ -24,6 +24,9 @@ import { actions, createAction } from "../store/actions";
 // Async Storage
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Firebase
+import Firebase from "../firebase-config";
+
 const appVersion = Constants.manifest.version;
 
 const Settings = ({ navigation }) => {
@@ -32,6 +35,15 @@ const Settings = ({ navigation }) => {
   const dispatch = store.dispatch;
 
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(state.theme !== "light");
+
+  const logout = () => {
+    Firebase.auth()
+      .signOut()
+      .then(() => {
+        console.log("User signed out!");
+        dispatch(createAction(actions.USER_LOGIN, null));
+      });
+  };
 
   const toggleSwitch = (switchState) => {
     setIsDarkModeEnabled(!isDarkModeEnabled);
@@ -58,6 +70,7 @@ const Settings = ({ navigation }) => {
       paddingTop: Typography.FONT_SIZE_TITLE_LG * 2,
       backgroundColor: Colors.themeColor(state.theme).background
     }]}>
+
       <Header
         leftElement={
           <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -76,31 +89,51 @@ const Settings = ({ navigation }) => {
         rightElement={null}
       />
 
-      <View style={[styles.container, { backgroundColor: Colors.themeColor(state.theme).background }]}>
+      <View style={[styles.container]}>
 
-        <Text style={[SharedStyles.typography.subtitle, styles.subTitle, { color: Colors.themeColor(state.theme).textColor }]}>{localization("theme")}</Text>
+        <Text style={[SharedStyles.typography.subtitle, { color: Colors.themeColor(state.theme).textColor }]}>User</Text>
+        <View style={styles.dataContainer}>
+          <View style={[styles.dataItem, { borderColor: Colors.themeColor(state.theme).textColor }]}>
+            <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>{state.user}</Text>
+          </View>
+        </View>
+
+        <Text style={[SharedStyles.typography.subtitle, { color: Colors.themeColor(state.theme).textColor }]}>{localization("theme")}</Text>
         <View style={styles.dataContainer}>
           <View style={[styles.dataItem, { borderColor: Colors.themeColor(state.theme).textColor }]}>
             <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>{localization("darkMode")}</Text>
             <Switch
               style={{ transform: Platform.OS === "ios" ? [{ scaleX: 0.7 }, { scaleY: 0.7 }] : [{ scaleX: 1 }, { scaleY: 1 }] }}
               thumbColor={isDarkModeEnabled ? Colors.themeColor(state.theme).backgroundSecondary : Colors.themeColor(state.theme).background}
-              trackColor={{ false: Colors.themeColor(state.theme).switchFalse, true: Colors.themeColor(state.theme).switchTrue }}
+              trackColor={{ true: Colors.themeColor(state.theme).secondary, false: Colors.themeColor(state.theme).primary }}
               onValueChange={toggleSwitch}
               value={isDarkModeEnabled}
             />
           </View>
         </View>
-        <Text style={[SharedStyles.typography.subtitle, styles.subTitle, { color: Colors.themeColor(state.theme).textColor }]}>{localization("about")}</Text>
+        <Text style={[SharedStyles.typography.subtitle, { color: Colors.themeColor(state.theme).textColor }]}>{localization("about")}</Text>
         <View style={styles.dataContainer}>
           <View style={[styles.dataItem, { color: Colors.themeColor(state.theme).textColor, borderColor: Colors.themeColor(state.theme).textColor }]}>
             <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>{localization("appVersion")}</Text>
             <Text style={[SharedStyles.typography.bodyMedum, { color: Colors.themeColor(state.theme).textColor, marginRight: Typography.FONT_SIZE_TITLE_MD * 0.5 }]}>{appVersion}</Text>
           </View>
         </View>
-      </View>
-    </View>
 
+      </View>
+
+      <View style={[styles.container, { color: Colors.themeColor(state.theme).textColor, borderColor: Colors.themeColor(state.theme).textColor, justifyContent: "flex-start", flex: 1 }]}>
+        <CircleBtn color={ state.user === "Guest" ? Colors.themeColor(state.theme).secondary : Colors.themeColor(state.theme).error} style={{ marginBottom: Typography.FONT_SIZE_TITLE_MD, justifyContent: "center", alignItems: "center" }}
+          onPress={() => logout()}
+        >
+          {
+            <Text style={[SharedStyles.typography.button, { color: Colors.themeColor("dark").textColor }]}>{
+              state.user === "Guest" ? localization("login") : localization("logout")
+            }</Text>
+          }
+        </CircleBtn>
+      </View>
+
+    </View>
   );
 };
 
@@ -111,9 +144,6 @@ const styles = StyleSheet.create({
   },
   title: {
     paddingBottom: Typography.FONT_SIZE_TITLE_LG
-  },
-  subTitle: {
-    paddingBottom: Typography.FONT_SIZE_SMALL - 2
   },
   dataContainer: {
     paddingBottom: Typography.FONT_SIZE_TITLE_LG

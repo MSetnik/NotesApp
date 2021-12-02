@@ -2,11 +2,11 @@
 export const FONT_FAMILY = "Roboto";
 
 // Font size
-export const FONT_SIZE_SMALL = 14;
-export const FONT_SIZE_NORMAL = 16;
-export const FONT_SIZE_MEDIUM = 18;
-export const FONT_SIZE_TITLE_MD = 20;
-export const FONT_SIZE_TITLE_LG = 24;
+export const FONT_SIZE_SMALL = 12;
+export const FONT_SIZE_NORMAL = 14;
+export const FONT_SIZE_MEDIUM = 16;
+export const FONT_SIZE_TITLE_MD = 18;
+export const FONT_SIZE_TITLE_LG = 22;
 
 // Line height
 export const LINE_HEIGHT_SMALL = 20;

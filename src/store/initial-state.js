@@ -1,5 +1,6 @@
 export const initialState = {
   notes: [],
   isLoading: true,
-  theme: "light"
+  theme: "light",
+  user: null
 };

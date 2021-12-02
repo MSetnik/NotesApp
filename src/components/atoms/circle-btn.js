@@ -18,12 +18,12 @@ const CircleBtn = ({
   return (
     <Pressable
       disabled={disabled}
-      style={[style, {
+      style={[{
         borderRadius: borderRadius,
         padding: Typography.LINE_HEIGHT_NORMAL / 2,
         backgroundColor: color,
         opacity: disabled ? 0.3 : pressOpacity
-      }]}
+      }, style]}
       onPress={onPress}
       onPressIn={() => setPressOpacity(0.5)}
       onPressOut={() => setPressOpacity(1)}

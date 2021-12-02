@@ -83,7 +83,7 @@ const NoteDetails = ({ navigation, route }) => {
 
   const getRandomColor = () => {
     let c;
-    const index = Math.floor(Math.random() * 6);
+    const index = Math.floor(Math.random() * colors.length);
     colors.forEach((color, i) => {
       if (i === index) {
         c = color;

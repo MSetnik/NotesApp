@@ -44,7 +44,26 @@ expo start
 ---
 [React Navigation](https://reactnavigation.org/docs/getting-started/)
 
+
+
 ## Expo SDK
 
 <br>
 
+## Masked View
+---
+[Masked View](https://docs.expo.dev/versions/latest/sdk/linear-gradient/)
+```
+expo install @react-native-masked-view/masked-view
+
+```
+
+
+## Linear gradient
+---
+[Linear gradient](https://reactnavigation.org/docs/getting-started/)
+
+```
+expo install expo-linear-gradient
+
+```

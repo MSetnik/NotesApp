@@ -9,6 +9,8 @@
 
 // Theme colors
 export const darkTheme = {
+  primary: "#4AA4F4",
+  secondary: "#3DF5AF",
   background: "#000000",
   card1: "#EBB8B8",
   card2: "#C3B7F0",
@@ -25,11 +27,16 @@ export const darkTheme = {
   shadowColor: "#000",
   switchTrue: "#81b0ff",
   switchFalse: "#767577",
-  dateColor: "#838383"
+  dateColor: "#838383",
+  success: "#06A77D",
+  warning: "#FE9B2B",
+  placeholderColor: "#404040"
 
 };
 
 export const lightTheme = {
+  primary: "#4AA4F4",
+  secondary: "#5E58F6",
   background: "#FFFFFF",
   card1: "#EBB8B8",
   card2: "#C3B7F0",
@@ -46,7 +53,10 @@ export const lightTheme = {
   shadowColor: "#000",
   switchTrue: "#81b0ff",
   switchFalse: "#767577",
-  dateColor: "#838383"
+  dateColor: "#838383",
+  success: "#06A77D",
+  warning: "#FE9B2B",
+  placeholderColor: "#d9d9d9"
 };
 
 // Color theme selector

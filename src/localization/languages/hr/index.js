@@ -8,7 +8,23 @@ const hr = {
   theme: "Tema",
   darkMode: "Tamni način",
   appVersion: "Verzija",
-  about: "O aplikaciji"
+  about: "O aplikaciji",
+  emailErrorMsg: "Email nije dobrog formata",
+  emailInUseMsg: "Email se već koristi",
+  passwordErrorMsg: "Lozinka mora imati 6 znakova",
+  confirmPasswordErrorMsg: "Lozinka se moraju poklapati",
+  networkErrorMsg: "Povezivanje nije uspjelo. Provjerite jeste li spojeni na internet.",
+  login: "Prijavi se",
+  register: "Registriraj se",
+  logout: "Odjava",
+  continueAsGuest: "Nastavi kao gost",
+  noAccMsg: "Nemaš račun?",
+  or: "ili",
+  password: "Lozinka",
+  eMail: "E-mail",
+  loginTitle: "Prijava",
+  registerTitle: "Registriraj se",
+  confirmPassword: "Potvrdi lozinku"
 };
 
 export default hr;
