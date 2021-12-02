@@ -89,6 +89,7 @@ const Register = ({ navigation }) => {
         await auth.createUserWithEmailAndPassword(email, password)
           .then(resp => {
             dispatch(createAction(actions.USER_LOGIN, resp.user.email));
+            dispatch(createAction(actions.USER_ID, resp.user.uid));
           });
       }
     } catch (error) {

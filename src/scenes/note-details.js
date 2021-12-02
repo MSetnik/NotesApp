@@ -27,6 +27,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // Constants
 import { ASYNC_STORAGE_KEY } from "../constants";
 
+// Firebase
+import Firebase from "../firebase-config";
+
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state"
 ]);
@@ -62,6 +65,19 @@ const NoteDetails = ({ navigation, route }) => {
   const noteTitle = useRef(title);
   const noteContent = useRef(content);
 
+  const db = Firebase.firestore();
+
+  // const notes = db.collection("notes")
+  //   .doc("3CkweN2h4OxllofI9zGp")
+  //   .get();
+  //   .set({
+  //     email: currentUser.email,
+  //     lastName: lastName,
+  //     firstName: firstName,
+  //   });
+  // const fireNotes = Firebase.firestore().collection("notes");
+
+  console.log(note);
   useEffect(() => {
     navigation.addListener("blur", () => {
       if (note !== undefined) {
@@ -95,7 +111,8 @@ const NoteDetails = ({ navigation, route }) => {
 
   const saveNote = (navigationOnBlur = false, title, content) => {
     const newNotesData = state.notes;
-
+    console.log(state.user);
+    alert("cas");
     state.notes.forEach((n, index) => {
       if (note.id === n.id) {
         const newNoteData = {
@@ -137,28 +154,50 @@ const NoteDetails = ({ navigation, route }) => {
     return biggestId;
   };
 
-  const addNote = (navigationOnBlur = false, title, content) => {
-    const newNotesData = state.notes;
-    const newNoteData = {
-      id: getNextId(),
-      title: title,
-      content: content,
-      date: date,
-      color: getRandomColor()
+  const addNote = async (navigationOnBlur = false, title, content) => {
+    await db.collection("users")
+      // .doc(state.userId)
+      // .add({
+      //   id: getNextId(),
+      //   title: title,
+      //   content: content,
+      //   date: date,
+      //   color: getRandomColor(),
+      //   userId: state.userId
+      // });
+      .add({});
 
-    };
+    // .set({
 
-    newNotesData.unshift(newNoteData);
+    // });
+    // .set({
+    //   title: title,
+    //   content: content
+    // });
+    // console.log(state.user);
+    // alert("da");
+    // console.log(getFirestore);
 
-    dispatch(createAction(actions.ADD_NOTE, newNotesData));
+    // const newNotesData = state.notes;
+    // const newNoteData = {
+    //   id: getNextId(),
+    //   title: title,
+    //   content: content,
+    //   date: date,
+    //   color: getRandomColor()
+    // };
 
-    storeDataAsyncStorage(newNotesData);
+    // newNotesData.unshift(newNoteData);
 
-    navigation.removeListener("blur");
+    // dispatch(createAction(actions.ADD_NOTE, newNotesData));
 
-    if (!navigationOnBlur) {
-      navigation.goBack();
-    }
+    // storeDataAsyncStorage(newNotesData);
+
+    // navigation.removeListener("blur");
+
+    // if (!navigationOnBlur) {
+    //   navigation.goBack();
+    // }
   };
 
   const deleteNote = () => {

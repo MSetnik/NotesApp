@@ -1,11 +1,10 @@
-
 import firebase from "firebase/app";
 import "firebase/auth";
 
 // Optionally import the services that you want to use
 // import {...} from "firebase/auth";
 // import {...} from "firebase/database";
-// import {...} from "firebase/firestore";
+import "firebase/firestore";
 // import {...} from "firebase/functions";
 // import {...} from "firebase/storage";
 
@@ -24,6 +23,7 @@ const firebaseConfig = {
 // initializeApp(firebaseConfig);
 
 let Firebase;
+// export const firestore = getFirestore();
 
 if (firebase.apps.length === 0) {
   Firebase = firebase.initializeApp(firebaseConfig);

@@ -38,6 +38,12 @@ export const reducer = (state = initialState, action) => {
         user: action.payload
       };
 
+    case actions.USER_ID:
+      return {
+        ...state,
+        userId: action.payload
+      };
+
     default:
       return state;
   }

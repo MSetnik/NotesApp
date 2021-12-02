@@ -51,7 +51,8 @@ const Login = ({ navigation }) => {
             setIsLoading(false);
             setLoginError(false);
 
-            dispatch(createAction(actions.USER_LOGIN, email));
+            dispatch(createAction(actions.USER_LOGIN, resp.user.email));
+            dispatch(createAction(actions.USER_ID, resp.user.uid));
           });
       }
     } catch (error) {
