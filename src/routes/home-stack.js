@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Platform, Text, View } from "react-native";
+import React from "react";
+import { Platform } from "react-native";
 // Navigation
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -7,9 +7,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Home from "../scenes/home";
 import NoteDetails from "../scenes/note-details";
 import Settings from "../scenes/settings";
-import Login from "../scenes/login";
-import Register from "../scenes/register";
-
 // Firebase
 
 const Stack = createNativeStackNavigator();

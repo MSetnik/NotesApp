@@ -72,7 +72,7 @@ const Home = ({ navigation }) => {
   if (store.state.isLoading) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={Colors.themeColor(state.theme).secondary} />
       </View>
     );
   }

@@ -39,7 +39,7 @@ const Register = ({ navigation }) => {
 
   const store = useContext(StoreContext);
   const state = store.state;
-
+  const dispatch = store.dispatch;
   // firebase.initializeApp(firebaseConfig);
   const auth = Firebase.auth();
 
@@ -55,8 +55,6 @@ const Register = ({ navigation }) => {
   };
 
   const onHandleSignup = async () => {
-    const emailValid = validateEmail();
-
     if (!validateEmail()) {
       return;
     }
@@ -90,19 +88,22 @@ const Register = ({ navigation }) => {
         console.log("success");
         await auth.createUserWithEmailAndPassword(email, password)
           .then(resp => {
-            console.log(resp);
-            if (resp.user !== null) {
-              navigation.navigate("Home");
-            }
+            dispatch(createAction(actions.USER_LOGIN, resp.user.email));
           });
       }
     } catch (error) {
       console.log(error.code);
       if (error.code === "auth/email-already-in-use") {
         alert(localization("emailInUseMsg"));
+        return;
       }
 
       if (error.code === "auth/invalid-email") {
+        alert(localization("emailErrorMsg"));
+        return;
+      }
+
+      if (error.code === "auth/network-request-failed") {
         alert(localization("emailErrorMsg"));
       }
       // console.error(error);
@@ -139,7 +140,7 @@ const Register = ({ navigation }) => {
   return (
     <View style={{ flex: 1, paddingTop: Constants.statusBarHeight + 20, alignItems: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
       <Text style={{ fontSize: 40, marginTop: 40, color: Colors.themeColor(state.theme).primary, fontWeight: "600" }}>
-          Register
+        {localization("register")}
       </Text>
 
       <KeyboardAvoidingView
@@ -149,7 +150,7 @@ const Register = ({ navigation }) => {
         <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
             <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
-              E-Mail
+              {localization("eMail")}
             </Text>
 
             {
@@ -168,11 +169,12 @@ const Register = ({ navigation }) => {
 
           <TextInput
             onChangeText={setEmail}
+            placeholder={"example@mail.com"}
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
+            autoCapitalize='none'
             style={[SharedStyles.typography.button, {
               borderBottomWidth: 1,
               borderColor: emailError !== null ? !emailError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
-
               color: Colors.themeColor(state.theme).textColor
 
             }]} />
@@ -186,7 +188,8 @@ const Register = ({ navigation }) => {
         <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
             <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
-             Password
+              {localization("password")}
+
             </Text>
 
             {
@@ -206,6 +209,9 @@ const Register = ({ navigation }) => {
           <TextInput
             onChangeText={setPassword}
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
+            secureTextEntry={true}
+            autoCapitalize='none'
+            placeholder='********'
             style={[SharedStyles.typography.button, {
               borderBottomWidth: 1,
               borderColor: passwordError !== null ? !passwordError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
@@ -221,7 +227,8 @@ const Register = ({ navigation }) => {
         <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
             <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
-             Confirm Password
+              {localization("confirmPassword")}
+
             </Text>
             {
               confirmPasswordError !== null ? !confirmPasswordError ? <AntDesign
@@ -239,6 +246,9 @@ const Register = ({ navigation }) => {
           <TextInput
             onChangeText={setConfirmPassword}
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
+            secureTextEntry={true}
+            autoCapitalize='none'
+            placeholder='********'
             style={[SharedStyles.typography.button, {
               borderBottomWidth: 1,
               borderColor: confirmPasswordError !== null ? !confirmPasswordError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
@@ -257,41 +267,9 @@ const Register = ({ navigation }) => {
             justifyContent: "center",
             alignItems: "center"
           }}>
-          <Text style={[SharedStyles.typography.button, { color: Colors.themeColor("dark").textColor }]}>Register</Text>
+          <Text style={[SharedStyles.typography.button, { color: Colors.themeColor("dark").textColor }]}>{localization("register")}</Text>
         </CircleBtn>
       </KeyboardAvoidingView>
-
-      {/* <View style={{ flex: 1, justifyContent: "flex-end", marginBottom: 50 }}>
-        <View style={{ alignItems: "center" }}>
-          <Text style={{
-            marginBottom: 10,
-            color: Colors.themeColor(state.theme).textColor
-          }}
-          >Dont have acc?
-          </Text>
-          <Pressable style={{ marginBottom: 10 }} onPress={() => navigation.navigate("Register")}>
-            <Text style={[SharedStyles.typography.titleNormal, {
-              fontWeight: "bold",
-              color: Colors.themeColor(state.theme).textColor
-            }]}>
-              Sign createUserWithEmailAndPassword
-            </Text>
-          </Pressable>
-          <Text style={{
-            marginBottom: 10,
-            color: Colors.themeColor(state.theme).textColor
-          }}>or</Text>
-          <Pressable>
-            <Text style={[SharedStyles.typography.titleNormal, {
-              fontWeight: "bold",
-              color: Colors.themeColor(state.theme).textColor
-            }]}>
-                Continue as guest
-            </Text>
-          </Pressable>
-        </View>
-      </View> */}
-
     </View>
   );
 };

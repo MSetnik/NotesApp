@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer, useState } from "react";
 
-import { useColorScheme } from "react-native";
+import { ActivityIndicator, useColorScheme, View } from "react-native";
 
 // React navigation
 import { NavigationContainer } from "@react-navigation/native";
@@ -22,6 +22,7 @@ import { ASYNC_STORAGE_KEY, THEME_KEY } from "./src/constants";
 
 // Firebase
 import Firebase from "./src/firebase-config";
+import { Colors } from "./src/styles";
 
 export default function App () {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -54,22 +55,29 @@ export default function App () {
 
   // Set an initializing state whilst Firebase connects
   const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState(null);
 
   // Handle user state changes
   function onAuthStateChanged (user) {
-    setUser(user);
-    console.log(user);
+    if (user !== null) {
+      dispatch(createAction(actions.USER_LOGIN, user.email));
+    }
     if (initializing) setInitializing(false);
   }
 
   useEffect(() => {
-    console.log(user === null);
     const subscriber = Firebase.auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber; // unsubscribe on unmount
   }, []);
 
-  if (!user) {
+  if (initializing) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
+        <ActivityIndicator size="large" color={Colors.themeColor(state.theme).secondary} />
+      </View>
+    );
+  }
+
+  if (!state.user) {
     return (
       <StoreContext.Provider value={{ dispatch, state }}>
         <NavigationContainer>

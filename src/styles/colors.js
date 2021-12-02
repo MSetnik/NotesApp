@@ -30,7 +30,7 @@ export const darkTheme = {
   dateColor: "#838383",
   success: "#06A77D",
   warning: "#FE9B2B",
-  placeholderColor: "#9c9c9c"
+  placeholderColor: "#404040"
 
 };
 
@@ -56,7 +56,7 @@ export const lightTheme = {
   dateColor: "#838383",
   success: "#06A77D",
   warning: "#FE9B2B",
-  placeholderColor: "#bfbfbf"
+  placeholderColor: "#d9d9d9"
 };
 
 // Color theme selector

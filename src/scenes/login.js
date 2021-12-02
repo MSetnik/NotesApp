@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Pressable, Text, TextInput, View, KeyboardAvoidingView } from "react-native";
+import { Pressable, Text, TextInput, View, KeyboardAvoidingView, ActivityIndicator } from "react-native";
 
 // Constants
 import Constants from "expo-constants";
@@ -8,7 +8,7 @@ import Constants from "expo-constants";
 import { AntDesign } from "@expo/vector-icons";
 
 // Sharedstyles
-import { SharedStyles, Colors } from "../styles";
+import { SharedStyles, Colors, Typography } from "../styles";
 
 // Components
 import { CircleBtn } from "../components/atoms";
@@ -29,32 +29,43 @@ import { localization } from "../localization";
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const store = useContext(StoreContext);
   const state = store.state;
+  const dispatch = store.dispatch;
+
+  // Errors
+  const [loginError, setLoginError] = useState(null);
 
   const auth = Firebase.auth();
 
-  const onHandleSignup = async () => {
+  const onHandleLogin = async () => {
     try {
       if (email !== "" && password !== "") {
-        console.log("success");
+        setIsLoading(true);
+
         await auth.signInWithEmailAndPassword(email, password)
           .then(resp => {
             console.log(resp);
+            setIsLoading(false);
+            setLoginError(false);
+
+            dispatch(createAction(actions.USER_LOGIN, email));
           });
       }
     } catch (error) {
-      console.log("fail");
+      setLoginError(true);
       alert(error);
       console.log(error);
+      setIsLoading(false);
     }
   };
 
   return (
     <View style={{ flex: 1, paddingTop: Constants.statusBarHeight + 20, alignItems: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
       <Text style={{ fontSize: 40, marginTop: 40, color: Colors.themeColor(state.theme).primary, fontWeight: "600" }}>
-          Log in
+        {localization("loginTitle")}
       </Text>
 
       <KeyboardAvoidingView
@@ -64,55 +75,91 @@ const Login = ({ navigation }) => {
         <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
             <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
-              E-Mail
+              {localization("eMail")}
             </Text>
 
-            <AntDesign name="exclamationcircleo" size={20} color={Colors.themeColor(state.theme).warning} />
+            {
+              loginError !== null ? !loginError ? <AntDesign
+                name="checkcircleo"
+                size={20}
+                color={Colors.themeColor(state.theme).success}
+              /> : <AntDesign
+                name="exclamationcircleo"
+                size={20}
+                color={Colors.themeColor(state.theme).warning}
+              /> : null
+            }
+
           </View>
 
           <TextInput
             onChangeText={setEmail}
-            placeholder='pero.peric@mail.com'
+            placeholder={"example@mail.com"}
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
+            autoCapitalize='none'
             style={[SharedStyles.typography.button, {
               borderBottomWidth: 1,
-              borderColor: Colors.themeColor(state.theme).warning,
+              borderColor: loginError !== null ? !loginError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
               color: Colors.themeColor(state.theme).textColor,
               fontWeight: "normal"
 
             }]} />
+
         </View>
 
         <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
             <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
-             Password
+              {localization("password")}
             </Text>
 
-            <AntDesign name="exclamationcircleo" size={20} color={Colors.themeColor(state.theme).warning}/>
+            {
+              loginError !== null ? !loginError ? <AntDesign
+                name="checkcircleo"
+                size={20}
+                color={Colors.themeColor(state.theme).success}
+              /> : <AntDesign
+                name="exclamationcircleo"
+                size={20}
+                color={Colors.themeColor(state.theme).warning}
+              /> : null
+            }
 
           </View>
 
           <TextInput
             onChangeText={setPassword}
+            secureTextEntry={true}
+            autoCapitalize='none'
             placeholder='********'
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
             style={[SharedStyles.typography.button, {
               borderBottomWidth: 1,
-              borderColor: Colors.themeColor(state.theme).warning,
+              borderColor: loginError !== null ? !loginError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
               color: Colors.themeColor(state.theme).textColor,
               fontWeight: "normal"
             }]} />
-          <Text style={{ color: Colors.themeColor(state.theme).warning }}>
-            Your Password is incorect
-          </Text>
+
         </View>
-        <CircleBtn color={Colors.themeColor("light").primary} style={{ marginTop: 20, justifyContent: "center", alignItems: "center" }}
-          onPress={() => onHandleSignup()}
+        <CircleBtn color={Colors.themeColor("light").primary} style={{ marginTop: Typography.FONT_SIZE_TITLE_MD, justifyContent: "center", alignItems: "center" }}
+          onPress={() => onHandleLogin()}
         >
-          <Text style={[SharedStyles.typography.button, { color: Colors.themeColor("dark").textColor }]}>Login</Text>
+          {
+            isLoading ? <ActivityIndicator size="small" color={Colors.themeColor("dark").textColor}/> : <Text style={[SharedStyles.typography.button, { color: Colors.themeColor("dark").textColor }]}>{localization("login")}</Text>
+          }
 
         </CircleBtn>
+
+        {
+          loginError && <Text style={ {
+            color: Colors.themeColor(state.theme).warning,
+            fontSize: Typography.FONT_SIZE_MEDIUM,
+            textAlign: "center",
+            marginTop: Typography.FONT_SIZE_TITLE_MD,
+            marginBottom: -(Typography.FONT_SIZE_TITLE_MD + Typography.FONT_SIZE_MEDIUM)
+          }}>{localization("loginError")}</Text>
+        }
+
       </KeyboardAvoidingView>
 
       <View style={{ marginTop: 150, position: "relative" }}>
@@ -121,26 +168,27 @@ const Login = ({ navigation }) => {
             marginBottom: 10,
             color: Colors.themeColor(state.theme).textColor
           }}
-          >Dont have account?
+          >
+            {localization("noAccMsg")}
           </Text>
-          <Pressable style={{ marginBottom: 10 }} onPress={() => navigation.navigate("Register")}>
-            <Text style={[SharedStyles.typography.titleNormal, {
-              fontWeight: "bold",
-              color: Colors.themeColor(state.theme).textColor
-            }]}>
-              Sign up
-            </Text>
-          </Pressable>
+          <CircleBtn color={Colors.themeColor(state.theme).secondary} style={{ marginTop: Typography.FONT_SIZE_TITLE_MD, justifyContent: "center", alignItems: "center" }}
+            onPress={() => navigation.navigate("Register")}
+          >
+            <Text style={[SharedStyles.typography.titleNormal, { color: Colors.themeColor("dark").textColor }]}>{localization("register")}</Text>
+          </CircleBtn>
+
           <Text style={{
-            marginBottom: 10,
+            marginVertical: 10,
             color: Colors.themeColor(state.theme).textColor
-          }}>or</Text>
-          <Pressable onPress={() => navigation.navigate("Home")}>
+          }}>
+            {localization("or")}
+          </Text>
+          <Pressable onPress={() => dispatch(createAction(actions.USER_LOGIN, "Guest"))}>
             <Text style={[SharedStyles.typography.titleNormal, {
               fontWeight: "bold",
               color: Colors.themeColor(state.theme).textColor
             }]}>
-                Continue as guest
+              {localization("continueAsGuest")}
             </Text>
           </Pressable>
         </View>
