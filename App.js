@@ -18,7 +18,7 @@ import { actions, createAction } from "./src/store/actions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Constants
-import { ASYNC_STORAGE_KEY, THEME_KEY } from "./src/constants";
+import { ASYNC_STORAGE_KEY, THEME_KEY, ASYNC_USER } from "./src/constants";
 
 // Firebase
 import Firebase from "./src/firebase-config";
@@ -35,6 +35,10 @@ export default function App () {
       try {
         const value = await AsyncStorage.getItem(ASYNC_STORAGE_KEY);
         const theme = await AsyncStorage.getItem(THEME_KEY);
+        const user = await AsyncStorage.getItem(ASYNC_USER);
+
+        console.log(user);
+        dispatch(createAction(actions.USER_LOGIN, "guest"));
 
         if (value !== null) {
           dispatch(createAction(actions.ADD_NOTE, JSON.parse(value)));
@@ -58,9 +62,11 @@ export default function App () {
 
   // Handle user state changes
   function onAuthStateChanged (user) {
+    console.log(user);
     if (user !== null) {
       dispatch(createAction(actions.USER_LOGIN, user.email));
     }
+
     if (initializing) setInitializing(false);
   }
 

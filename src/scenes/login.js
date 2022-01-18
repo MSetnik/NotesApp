@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Pressable, Text, TextInput, View, KeyboardAvoidingView, ActivityIndicator } from "react-native";
+import { Pressable, Text, TextInput, View, KeyboardAvoidingView, ActivityIndicator, Image, StatusBar } from "react-native";
 
 // Constants
 import Constants from "expo-constants";
@@ -26,6 +26,10 @@ import Firebase from "../firebase-config";
 // Localization
 import { localization } from "../localization";
 
+// Async storage
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ASYNC_USER } from "../constants";
+
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,12 +52,14 @@ const Login = ({ navigation }) => {
         await auth.signInWithEmailAndPassword(email, password)
           .then(resp => {
             console.log(resp);
+            dispatch(createAction(actions.USER_ID, resp.user.uid));
+            dispatch(createAction(actions.USER_LOGIN, resp.user.email));
+
             setIsLoading(false);
             setLoginError(false);
-
-            dispatch(createAction(actions.USER_LOGIN, resp.user.email));
-            dispatch(createAction(actions.USER_ID, resp.user.uid));
           });
+      } else {
+        setLoginError(true);
       }
     } catch (error) {
       setLoginError(true);
@@ -63,19 +69,29 @@ const Login = ({ navigation }) => {
     }
   };
 
+  const storeUserAsync = async () => {
+    try {
+      await AsyncStorage.setItem(ASYNC_USER, "guest");
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
-    <View style={{ flex: 1, paddingTop: Constants.statusBarHeight + 20, alignItems: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
-      <Text style={{ fontSize: 40, marginTop: 40, color: Colors.themeColor(state.theme).primary, fontWeight: "600" }}>
-        {localization("loginTitle")}
-      </Text>
+    <View style={{ flex: 1, paddingTop: Constants.statusBarHeight, alignItems: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
+      <StatusBar style={state.theme} />
+
+      <View style={{ flexDirection: "row" }}>
+        <Image source={state.theme === "light" ? require("../assets/Notix-logo.png") : require("../assets/Notix-logo-white.png")} style={{ width: "60%", resizeMode: "contain" }} />
+      </View>
 
       <KeyboardAvoidingView
         behavior={"position"}
-        style={{ justifyContent: "center", marginTop: 100, width: "80%" }}>
+        style={{ justifyContent: "center", marginTop: 20, width: "80%" }}>
 
         <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-            <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
+            <Text style={{ fontSize: Typography.FONT_SIZE_MEDIUM, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
               {localization("eMail")}
             </Text>
 
@@ -87,7 +103,7 @@ const Login = ({ navigation }) => {
               /> : <AntDesign
                 name="exclamationcircleo"
                 size={20}
-                color={Colors.themeColor(state.theme).warning}
+                color={Colors.themeColor(state.theme).error}
               /> : null
             }
 
@@ -100,7 +116,7 @@ const Login = ({ navigation }) => {
             autoCapitalize='none'
             style={[SharedStyles.typography.button, {
               borderBottomWidth: 1,
-              borderColor: loginError !== null ? !loginError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
+              borderColor: loginError !== null ? !loginError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).error : Colors.themeColor(state.theme).inputBorderColor,
               color: Colors.themeColor(state.theme).textColor,
               fontWeight: "normal"
 
@@ -110,7 +126,7 @@ const Login = ({ navigation }) => {
 
         <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-            <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
+            <Text style={{ fontSize: Typography.FONT_SIZE_MEDIUM, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
               {localization("password")}
             </Text>
 
@@ -122,7 +138,7 @@ const Login = ({ navigation }) => {
               /> : <AntDesign
                 name="exclamationcircleo"
                 size={20}
-                color={Colors.themeColor(state.theme).warning}
+                color={Colors.themeColor(state.theme).error}
               /> : null
             }
 
@@ -136,7 +152,7 @@ const Login = ({ navigation }) => {
             placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
             style={[SharedStyles.typography.button, {
               borderBottomWidth: 1,
-              borderColor: loginError !== null ? !loginError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
+              borderColor: loginError !== null ? !loginError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).error : Colors.themeColor(state.theme).inputBorderColor,
               color: Colors.themeColor(state.theme).textColor,
               fontWeight: "normal"
             }]} />
@@ -153,7 +169,7 @@ const Login = ({ navigation }) => {
 
         {
           loginError && <Text style={ {
-            color: Colors.themeColor(state.theme).warning,
+            color: Colors.themeColor(state.theme).error,
             fontSize: Typography.FONT_SIZE_MEDIUM,
             textAlign: "center",
             marginTop: Typography.FONT_SIZE_TITLE_MD,
@@ -163,7 +179,7 @@ const Login = ({ navigation }) => {
 
       </KeyboardAvoidingView>
 
-      <View style={{ marginTop: 150, position: "relative" }}>
+      <View style={{ marginTop: 120, position: "relative" }}>
         <View style={{ alignItems: "center" }}>
           <Text style={{
             marginBottom: 10,
@@ -184,7 +200,10 @@ const Login = ({ navigation }) => {
           }}>
             {localization("or")}
           </Text>
-          <Pressable onPress={() => dispatch(createAction(actions.USER_LOGIN, "Guest"))}>
+          <Pressable onPress={() => {
+            dispatch(createAction(actions.USER_LOGIN, "guest"));
+            storeUserAsync();
+          } }>
             <Text style={[SharedStyles.typography.titleNormal, {
               fontWeight: "bold",
               color: Colors.themeColor(state.theme).textColor

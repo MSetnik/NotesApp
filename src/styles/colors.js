@@ -10,7 +10,7 @@
 // Theme colors
 export const darkTheme = {
   primary: "#4AA4F4",
-  secondary: "#3DF5AF",
+  secondary: "#44BE90",
   background: "#000000",
   card1: "#EBB8B8",
   card2: "#C3B7F0",
@@ -30,7 +30,8 @@ export const darkTheme = {
   dateColor: "#838383",
   success: "#06A77D",
   warning: "#FE9B2B",
-  placeholderColor: "#404040"
+  placeholderColor: "#404040",
+  inputBorderColor: "#E5E5E5"
 
 };
 
@@ -56,7 +57,8 @@ export const lightTheme = {
   dateColor: "#838383",
   success: "#06A77D",
   warning: "#FE9B2B",
-  placeholderColor: "#d9d9d9"
+  placeholderColor: "#d9d9d9",
+  inputBorderColor: "#383838"
 };
 
 // Color theme selector

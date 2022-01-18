@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator, Pressable } from "react-native";
 
 // Status Bar
@@ -18,12 +18,66 @@ import { StoreContext } from "../store/reducer";
 // Localization
 import { localization } from "../localization";
 
+// Firebase
+import Firebase from "../firebase-config";
+import { data } from "../assets/dummy-data";
+
 const SETTINGS = true;
 
 const Home = ({ navigation }) => {
   const store = useContext(StoreContext);
   const state = store.state;
   const notes = store.state.notes;
+  const [notesData, setNotesData] = useState("");
+
+  const db = Firebase.firestore();
+  const auth = Firebase.auth();
+
+  useEffect(() => {
+    const getFirebaseData = async () => {
+      const firebaseData = [];
+      const d = [];
+      await Firebase.firestore().collection("users").doc(auth.currentUser.uid).collection("notes").get().then((querySnapshot) => {
+        querySnapshot.forEach(snapshot => {
+          const data = snapshot.data();
+          firebaseData.push(data);
+          setNotesData(firebaseData);
+          console.log("gotobo");
+        });
+        // return firebaseData;
+      });
+
+      //   let array = [];
+      //   let index1 = 1;
+      //   data.forEach((el, index) => {
+      //     if (index1 % 3 === 0) {
+      //       index1 = 0;
+      //       d.push(array);
+      //       d.push(el);
+      //       array = [];
+      //     } else {
+      //       array.push(el);
+      //     }
+
+      //     if (index + 1 === data.length && index1 % 3 !== 0) {
+      //       d.push(array);
+      //     }
+
+      //     index1++;
+      //   });
+
+      //   return d;
+    };
+    getFirebaseData();
+
+    // if (state.user === "guest") {
+    //   setNotesData(data1());
+    // } else {
+    //   setNotesData(getFirebaseData());
+    // }
+  });
+
+  console.log(notesData);
 
   // Formatiranje JSON podataka za ispis
   const data1 = () => {
@@ -52,10 +106,15 @@ const Home = ({ navigation }) => {
   };
 
   const renderItem = ({ item, index }) => {
+    console.log(item);
     if (item[0] !== undefined) {
       return <NoteCard item={item} type={1} index={index} navigation={navigation}/>;
     }
     return <NoteCard item={item} type={2} index={index} navigation={navigation}/>;
+  };
+
+  const renderItem2 = (data) => {
+    console.log(data);
   };
 
   const keyExtractor = (item) => {
@@ -76,9 +135,9 @@ const Home = ({ navigation }) => {
       </View>
     );
   }
-
   return (
     <View style={{ flex: 1, backgroundColor: Colors.themeColor(state.theme).background, paddingTop: Typography.FONT_SIZE_TITLE_LG * 2 }}>
+
       <StatusBar style={state.theme === "light" ? "dark" : "light"}/>
       <Header
         leftElement={
@@ -92,10 +151,10 @@ const Home = ({ navigation }) => {
         </CircleBtn> }
       />
 
-      {
+      {/* {
         notes.length !== 0 ? <FlatList
           style={{ flex: 1 }}
-          data={data1()}
+          data={notesData}
           renderItem={renderItem}
           keyExtractor={(item) => keyExtractor(item)}
         /> : <Pressable onPress={() => navigation.navigate("NoteDetails")}>
@@ -106,7 +165,14 @@ const Home = ({ navigation }) => {
             textStyle={{ marginLeft: Typography.FONT_SIZE_TITLE_MD * 0.5 }}/>
         </Pressable>
 
-      }
+      } */}
+
+      <FlatList
+        style={{ flex: 1 }}
+        data={notesData}
+        renderItem={renderItem}
+        keyExtractor={(item) => keyExtractor(item)}
+      />
 
       <View style={[{ position: "absolute", bottom: Typography.FONT_SIZE_TITLE_MD * 2, right: Typography.FONT_SIZE_TITLE_MD * 2 }, SharedStyles.shadow.elevation5]}>
         <CircleBtn

@@ -66,6 +66,7 @@ const NoteDetails = ({ navigation, route }) => {
   const noteContent = useRef(content);
 
   const db = Firebase.firestore();
+  const auth = Firebase.auth();
 
   // const notes = db.collection("notes")
   //   .doc("3CkweN2h4OxllofI9zGp")
@@ -155,18 +156,39 @@ const NoteDetails = ({ navigation, route }) => {
   };
 
   const addNote = async (navigationOnBlur = false, title, content) => {
-    await db.collection("users")
-      // .doc(state.userId)
-      // .add({
-      //   id: getNextId(),
-      //   title: title,
-      //   content: content,
-      //   date: date,
-      //   color: getRandomColor(),
-      //   userId: state.userId
-      // });
-      .add({});
+    if (state.user === "guest") {
+      const newNotesData = state.notes;
+      const newNoteData = {
+        id: getNextId(),
+        title: title,
+        content: content,
+        date: date,
+        color: getRandomColor()
+      };
 
+      newNotesData.unshift(newNoteData);
+
+      dispatch(createAction(actions.ADD_NOTE, newNotesData));
+
+      storeDataAsyncStorage(newNotesData);
+    } else {
+      await db.collection("users")
+        .doc(auth.currentUser.uid)
+      // .doc(state.userId)
+        .collection("notes")
+        .add({
+          title: title,
+          content: content,
+          date: date,
+          color: getRandomColor(),
+          userId: state.userId
+        });
+      navigation.removeListener("blur");
+    }
+
+    // .add({});
+
+    // const res = await db.collection("cities").doc("LA").set(data);
     // .set({
 
     // });
@@ -178,26 +200,9 @@ const NoteDetails = ({ navigation, route }) => {
     // alert("da");
     // console.log(getFirestore);
 
-    // const newNotesData = state.notes;
-    // const newNoteData = {
-    //   id: getNextId(),
-    //   title: title,
-    //   content: content,
-    //   date: date,
-    //   color: getRandomColor()
-    // };
-
-    // newNotesData.unshift(newNoteData);
-
-    // dispatch(createAction(actions.ADD_NOTE, newNotesData));
-
-    // storeDataAsyncStorage(newNotesData);
-
-    // navigation.removeListener("blur");
-
-    // if (!navigationOnBlur) {
-    //   navigation.goBack();
-    // }
+    if (!navigationOnBlur) {
+      navigation.goBack();
+    }
   };
 
   const deleteNote = () => {

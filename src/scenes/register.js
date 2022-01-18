@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Pressable, Text, TextInput, View, KeyboardAvoidingView, Alert } from "react-native";
+import { Pressable, Text, TextInput, View, KeyboardAvoidingView, Alert, Image } from "react-native";
 
 // Constants
 import Constants from "expo-constants";
@@ -8,7 +8,7 @@ import Constants from "expo-constants";
 import { AntDesign } from "@expo/vector-icons";
 
 // Sharedstyles
-import { SharedStyles, Colors } from "../styles";
+import { SharedStyles, Colors, Typography } from "../styles";
 
 // Components
 import { CircleBtn } from "../components/atoms";
@@ -75,7 +75,6 @@ const Register = ({ navigation }) => {
     }
 
     if (password !== confirmPassword) {
-      console.log("Nije isto");
       setPasswordErrorMsg(localization("confirmPasswordErrorMsg"));
       setConfirmPasswordError(true);
       return;
@@ -139,18 +138,18 @@ const Register = ({ navigation }) => {
   // };
 
   return (
-    <View style={{ flex: 1, paddingTop: Constants.statusBarHeight + 20, alignItems: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
-      <Text style={{ fontSize: 40, marginTop: 40, color: Colors.themeColor(state.theme).primary, fontWeight: "600" }}>
-        {localization("register")}
-      </Text>
+    <View style={{ flex: 1, paddingTop: Constants.statusBarHeight, alignItems: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
+      <View style={{ flexDirection: "row" }}>
+        <Image source={state.theme === "light" ? require("../assets/Notix-logo.png") : require("../assets/Notix-logo-white.png")} style={{ width: "60%", resizeMode: "contain" }} />
+      </View>
 
       <KeyboardAvoidingView
         behavior={"padding"}
-        style={{ justifyContent: "center", marginTop: 100, width: "80%" }}>
+        style={{ justifyContent: "center", marginTop: 20, width: "80%" }}>
 
         <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-            <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
+            <Text style={{ fontSize: Typography.FONT_SIZE_MEDIUM, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
               {localization("eMail")}
             </Text>
 
@@ -188,7 +187,7 @@ const Register = ({ navigation }) => {
 
         <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-            <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
+            <Text style={{ fontSize: Typography.FONT_SIZE_MEDIUM, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
               {localization("password")}
 
             </Text>
@@ -227,7 +226,7 @@ const Register = ({ navigation }) => {
 
         <View style={{ marginBottom: 20 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-            <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
+            <Text style={{ fontSize: Typography.FONT_SIZE_MEDIUM, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
               {localization("confirmPassword")}
 
             </Text>
