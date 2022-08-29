@@ -24,7 +24,8 @@ import { actions, createAction } from "../store/actions";
 // Async Storage
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const appVersion = Constants.manifest.version;
+// const appVersion = Constants.manifest.version;
+const appVersion = 1;
 
 const Settings = ({ navigation }) => {
   const store = useContext(StoreContext);
