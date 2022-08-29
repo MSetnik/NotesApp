@@ -63,13 +63,15 @@ const NoteDetails = ({ navigation, route }) => {
   const noteContent = useRef(content);
 
   useEffect(() => {
-    navigation.addListener("blur", () => {
-      if (note !== undefined) {
-        saveNote(true, noteTitle.current, noteContent.current);
-      } else if (noteTitle.current !== "" || noteContent.current !== "") {
-        addNote(true, noteTitle.current, noteContent.current);
-      }
-    });
+
+    // TODO: BUG FIX duple biljeske kod spremanja
+    // navigation.addListener("blur", () => {
+    //   if (note !== undefined) {
+    //     saveNote(true, noteTitle.current, noteContent.current);
+    //   } else if (noteTitle.current !== "" || noteContent.current !== "") {
+    //     addNote(true, noteTitle.current, noteContent.current);
+    //   }
+    // });
   }, []);
 
   const storeDataAsyncStorage = async (value) => {
@@ -152,13 +154,23 @@ const NoteDetails = ({ navigation, route }) => {
 
     dispatch(createAction(actions.ADD_NOTE, newNotesData));
 
+    console.log(newNotesData);
+
     storeDataAsyncStorage(newNotesData);
 
-    navigation.removeListener("blur");
+    // BUG WORKAROUND
+    navigation.goBack();
 
-    if (!navigationOnBlur) {
-      navigation.goBack();
-    }
+    // TODO: BUG FIX - duplo dodavanje notesa
+    //  \/\/\/
+
+    // navigation.removeListener("blur");
+
+    // if (!navigationOnBlur) {
+    //   navigation.goBack();
+    // }
+
+    // BUG FIX END
   };
 
   const deleteNote = () => {
