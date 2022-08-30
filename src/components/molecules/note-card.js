@@ -39,7 +39,7 @@ const NoteCard = ({
     );
   } else {
     return (
-      <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 10 }}>
+      <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: Typography.FONT_SIZE_TITLE_MD / 2 }}>
         <Pressable
           style={[styles.cardLong, { backgroundColor: item.color }]}
           onPress={() => navigation.navigate("NoteDetails", { item: item })}
@@ -59,8 +59,8 @@ const styles = StyleSheet.create({
     width: "46%",
     aspectRatio: 1 / 1,
     backgroundColor: "red",
-    borderRadius: 20,
-    padding: 14
+    borderRadius: Typography.FONT_SIZE_TITLE_MD,
+    padding: Typography.FONT_SIZE_SMALL
   },
   noteTitle: {
     flex: 1
@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
   cardLong: {
     width: "95%",
     aspectRatio: 15 / 7,
-    borderRadius: 20,
-    padding: 14
+    borderRadius: Typography.FONT_SIZE_TITLE_MD,
+    padding: Typography.FONT_SIZE_SMALL
   }
 });
 

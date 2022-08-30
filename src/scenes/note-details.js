@@ -63,13 +63,14 @@ const NoteDetails = ({ navigation, route }) => {
   const noteContent = useRef(content);
 
   useEffect(() => {
-    navigation.addListener("blur", () => {
-      if (note !== undefined) {
-        saveNote(true, noteTitle.current, noteContent.current);
-      } else if (noteTitle.current !== "" || noteContent.current !== "") {
-        addNote(true, noteTitle.current, noteContent.current);
-      }
-    });
+    // TODO: BUG - duplo dodavanje biljeski
+    // navigation.addListener("blur", () => {
+    //   if (note !== undefined) {
+    //     saveNote(true, noteTitle.current, noteContent.current);
+    //   } else if (noteTitle.current !== "" || noteContent.current !== "") {
+    //     addNote(true, noteTitle.current, noteContent.current);
+    //   }
+    // });
   }, []);
 
   const storeDataAsyncStorage = async (value) => {
