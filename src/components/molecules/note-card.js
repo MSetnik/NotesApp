@@ -1,6 +1,8 @@
-import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
-import { SharedStyles, Typography } from "../../styles";
+import React, { useEffect } from "react";
+import { Text, StyleSheet, Pressable } from "react-native";
+import { SharedStyles } from "../../styles";
+
+import Animated, { useSharedValue, withTiming, Easing, ReduceMotion } from "react-native-reanimated";
 
 // Helpers
 import { dateHelper } from "../../helpers";
@@ -8,11 +10,46 @@ import { dateHelper } from "../../helpers";
 const NoteCard = ({
   type = 1,
   item,
+  index,
   navigation
 }) => {
+  const opacity = useSharedValue(0);
+  const position = useSharedValue(-50);
+
+  const enterAnimation = () => {
+    opacity.value = withTiming(1, {
+      duration: (index + 1) * 600,
+      easing: Easing.inOut(Easing.quad),
+      reduceMotion: ReduceMotion.System
+    });
+    position.value = withTiming(0, {
+      duration: (index + 1) * 600,
+      easing: Easing.inOut(Easing.quad),
+      reduceMotion: ReduceMotion.System
+    });
+  };
+
+  const exitAnimation = () => {
+    console.log("da");
+    opacity.value = withTiming(0, {
+      duration: 600,
+      easing: Easing.inOut(Easing.quad),
+      reduceMotion: ReduceMotion.System
+    });
+    position.value = withTiming(-50, {
+      duration: 600,
+      easing: Easing.inOut(Easing.quad),
+      reduceMotion: ReduceMotion.System
+    });
+  };
+
+  useEffect(() => {
+    enterAnimation();
+  }, []);
+
   if (type === 1) {
     return (
-      <View style={{ flexDirection: "row", justifyContent: item[1] !== undefined ? "space-evenly" : "flex-start", marginBottom: 10, marginLeft: item[1] !== undefined ? 0 : 10 }}>
+      <Animated.View style={{ flexDirection: "row", justifyContent: item[1] !== undefined ? "space-evenly" : "flex-start", marginBottom: 10, marginLeft: item[1] !== undefined ? 0 : 10, opacity, bottom: position }}>
         <Pressable
           style={[styles.cardShort, { backgroundColor: item[0].color }]}
           onPress={() => navigation.navigate("NoteDetails", { item: item[0] })}
@@ -34,12 +71,12 @@ const NoteCard = ({
           </Pressable>
         }
 
-      </View>
+      </Animated.View>
 
     );
   } else {
     return (
-      <View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 10 }}>
+      <Animated.View style={{ flexDirection: "row", justifyContent: "center", marginBottom: 10, opacity, bottom: position }}>
         <Pressable
           style={[styles.cardLong, { backgroundColor: item.color }]}
           onPress={() => navigation.navigate("NoteDetails", { item: item })}
@@ -48,7 +85,7 @@ const NoteCard = ({
 
           <Text style={{ justifyContent: "flex-end" }}>{dateHelper.formatDate(item.date)}</Text>
         </Pressable>
-      </View>
+      </Animated.View>
 
     );
   }

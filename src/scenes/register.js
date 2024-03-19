@@ -23,7 +23,7 @@ import { actions, createAction } from "../store/actions";
 // import { initializeApp } from "firebase/app";
 // import { firebaseConfig } from "../firebase-config";
 // import { getAuth, onAuthStateChanged, FacebookAuthProvider, signInWithCredential } from "firebase/auth";
-import Firebase from "../firebase-config";
+import { Firebase } from "../firebase-config";
 import { localization } from "../localization";
 
 const Register = ({ navigation }) => {

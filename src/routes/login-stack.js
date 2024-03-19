@@ -11,7 +11,7 @@ import Login from "../scenes/login";
 import Register from "../scenes/register";
 
 // Firebase
-import Firebase from "../firebase-config";
+import { Firebase } from "../firebase-config";
 
 const Stack = createNativeStackNavigator();
 

@@ -8,8 +8,8 @@ const Header = ({ leftElement, rightElement }) => {
       flexDirection: "row",
       justifyContent: "space-between",
       marginHorizontal: Typography.FONT_SIZE_TITLE_MD,
-      alignItems: "center",
-      marginBottom: Typography.FONT_SIZE_TITLE_MD
+      alignItems: "center"
+      // marginBottom: Typography.FONT_SIZE_TITLE_MD
     }}>
       {leftElement}
       {rightElement}

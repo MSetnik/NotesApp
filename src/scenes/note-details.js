@@ -26,6 +26,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Constants
 import { ASYNC_STORAGE_KEY } from "../constants";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state"
@@ -41,6 +42,7 @@ const colors = [
 ];
 
 const NoteDetails = ({ navigation, route }) => {
+  const { top, bottom } = useSafeAreaInsets();
   const store = useContext(StoreContext);
   const state = store.state;
   const dispatch = store.dispatch;
@@ -179,7 +181,7 @@ const NoteDetails = ({ navigation, route }) => {
     <View style={{
       flex: 1,
       backgroundColor: Colors.themeColor(state.theme).background,
-      paddingTop: Typography.FONT_SIZE_TITLE_LG * 2
+      paddingTop: top
     }}>
       <Header
         leftElement={

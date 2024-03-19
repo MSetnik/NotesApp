@@ -21,8 +21,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ASYNC_STORAGE_KEY, THEME_KEY } from "./src/constants";
 
 // Firebase
-import Firebase from "./src/firebase-config";
+import { Firebase, auth } from "./src/firebase-config";
 import { Colors } from "./src/styles";
+import { getAuth } from "firebase/auth";
 
 export default function App () {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -58,14 +59,18 @@ export default function App () {
 
   // Handle user state changes
   function onAuthStateChanged (user) {
-    if (user !== null) {
+    if (user && user !== null) {
       dispatch(createAction(actions.USER_LOGIN, user.email));
     }
     if (initializing) setInitializing(false);
   }
 
+  let auth;
   useEffect(() => {
-    const subscriber = Firebase.auth().onAuthStateChanged(onAuthStateChanged);
+    if (!auth) {
+      auth = getAuth();
+    }
+    const subscriber = onAuthStateChanged(auth, (user) => onAuthStateChanged(user));
     return subscriber; // unsubscribe on unmount
   }, []);
 

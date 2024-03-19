@@ -25,7 +25,8 @@ const en = {
   eMail: "E-mail",
   loginTitle: "Login",
   registerTitle: "Register",
-  confirmPassword: "Confirm password"
+  confirmPassword: "Confirm password",
+  searchEmpty: "No notes found. Try with different search."
 
 };
 

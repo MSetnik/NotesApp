@@ -21,10 +21,11 @@ import { StoreContext } from "../store/reducer";
 import { actions, createAction } from "../store/actions";
 
 // Firebase
-import Firebase from "../firebase-config";
+import { Firebase } from "../firebase-config";
 
 // Localization
 import { localization } from "../localization";
+import { getAuth } from "firebase/auth";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -38,7 +39,7 @@ const Login = ({ navigation }) => {
   // Errors
   const [loginError, setLoginError] = useState(null);
 
-  const auth = Firebase.auth();
+  const auth = getAuth();
 
   const onHandleLogin = async () => {
     try {

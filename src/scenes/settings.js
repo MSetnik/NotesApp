@@ -22,14 +22,16 @@ import { StoreContext } from "../store/reducer";
 import { actions, createAction } from "../store/actions";
 
 // Async Storage
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Firebase
-import Firebase from "../firebase-config";
+import { Firebase } from "../firebase-config";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const appVersion = Constants.manifest.version;
+const appVersion = Constants.appVersion;
 
 const Settings = ({ navigation }) => {
+  const { top } = useSafeAreaInsets();
   const store = useContext(StoreContext);
   const state = store.state;
   const dispatch = store.dispatch;
@@ -58,16 +60,16 @@ const Settings = ({ navigation }) => {
   };
 
   const saveThemeAsyncStorage = async (theme) => {
-    try {
-      await AsyncStorage.setItem(THEME_KEY, theme);
-    } catch (e) {
-      console.log(e);
-    }
+    // try {
+    //   await AsyncStorage.setItem(THEME_KEY, theme);
+    // } catch (e) {
+    //   console.log(e);
+    // }
   };
 
   return (
     <View style={[SharedStyles.layout.safeArea, {
-      paddingTop: Typography.FONT_SIZE_TITLE_LG * 2,
+      paddingTop: top,
       backgroundColor: Colors.themeColor(state.theme).background
     }]}>
 

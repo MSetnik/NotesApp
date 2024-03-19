@@ -1,5 +1,8 @@
-import React, { useContext } from "react";
-import { View, Text, FlatList, ActivityIndicator, Pressable } from "react-native";
+import React, { useContext, useRef, useState } from "react";
+import { View, Text, FlatList, ActivityIndicator, Pressable, TextInput } from "react-native";
+
+// Reanimated
+import Animated, { useSharedValue, withTiming, Easing, ReduceMotion } from "react-native-reanimated";
 
 // Status Bar
 import { StatusBar } from "expo-status-bar";
@@ -17,13 +20,23 @@ import { StoreContext } from "../store/reducer";
 
 // Localization
 import { localization } from "../localization";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SETTINGS = true;
 
 const Home = ({ navigation }) => {
+  const { top, bottom } = useSafeAreaInsets();
   const store = useContext(StoreContext);
   const state = store.state;
   const notes = store.state.notes;
+
+  const textInputRef = useRef(null);
+
+  const marginTop = useSharedValue(-60);
+
+  const [textInputVisible, setTextInputVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResult, setSearchResult] = useState(notes);
 
   // Formatiranje JSON podataka za ispis
   const data1 = () => {
@@ -31,7 +44,8 @@ const Home = ({ navigation }) => {
 
     let array = [];
     let index1 = 1;
-    notes.forEach((el, index) => {
+
+    searchResult.forEach((el, index) => {
       if (index1 % 3 === 0) {
         index1 = 0;
         d.push(array);
@@ -41,7 +55,7 @@ const Home = ({ navigation }) => {
         array.push(el);
       }
 
-      if (index + 1 === notes.length && index1 % 3 !== 0) {
+      if (index + 1 === searchResult.length && index1 % 3 !== 0) {
         d.push(array);
       }
 
@@ -69,6 +83,21 @@ const Home = ({ navigation }) => {
     return key;
   };
 
+  const searchItem = (searchQuery) => {
+    setSearchQuery(searchQuery);
+    if (searchQuery !== "") {
+      const result = notes.filter(item =>
+        item.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchResult(result);
+
+      console.log(result);
+    } else {
+      setSearchResult(notes);
+    }
+  };
+
   if (store.state.isLoading) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
@@ -78,37 +107,128 @@ const Home = ({ navigation }) => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.themeColor(state.theme).background, paddingTop: Typography.FONT_SIZE_TITLE_LG * 2 }}>
+    <View style={{
+      flex: 1,
+      backgroundColor: Colors.themeColor(state.theme).background
+    }}>
       <StatusBar style={state.theme === "light" ? "dark" : "light"}/>
-      <Header
-        leftElement={
-          <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL * 2, color: Colors.themeColor(state.theme).textColor }}>{localization("notes")}</Text>
+      <View style={{
+        backgroundColor: Colors.themeColor(state.theme).background,
+        paddingTop: top,
+        marginBottom: Typography.FONT_SIZE_TITLE_MD,
+        zIndex: 99
+      }}>
+        <Header
+          leftElement={
+            <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL * 2, color: Colors.themeColor(state.theme).textColor }}>{localization("notes")}</Text>
+          }
+
+          rightElement={SETTINGS && <View style={{ flexDirection: "row" }}>
+            <CircleBtn
+              color={Colors.themeColor(state.theme).btnColor}
+              onPress={() => {
+                searchItem("");
+
+                if (textInputVisible) {
+                  setTextInputVisible(false);
+                  marginTop.value = withTiming(-60, {
+                    duration: 200,
+                    easing: Easing.inOut(Easing.quad),
+                    reduceMotion: ReduceMotion.System
+                  });
+
+                  textInputRef.current.blur();
+
+                  return;
+                }
+                setTextInputVisible(true);
+                marginTop.value = withTiming(0, {
+                  duration: 200,
+                  easing: Easing.inOut(Easing.quad),
+                  reduceMotion: ReduceMotion.System
+                });
+
+                textInputRef.current.focus();
+              }}>
+              <Feather name={!textInputVisible ? "search" : "x" } size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />
+            </CircleBtn>
+
+            <CircleBtn
+              style={{ marginLeft: Typography.FONT_SIZE_NORMAL }}
+              color={Colors.themeColor(state.theme).btnColor}
+              onPress={() => navigation.navigate("Settings")}>
+              <Feather name="settings" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />
+            </CircleBtn></View>}
+        />
+
+      </View>
+
+      {/* {
+        textInputVisible && */}
+      <Animated.View style={{
+        flexDirection: "row",
+        marginTop: marginTop
+      }}>
+        <TextInput
+          ref={textInputRef}
+          placeholder="Search"
+          onChangeText={text => searchItem(text)}
+          value={searchQuery}
+          style={{
+            color: Colors.themeColor(state.theme).dateColor,
+            borderColor: Colors.themeColor(state.theme).btnColor,
+            marginHorizontal: "2%",
+            height: 40,
+            borderWidth: 1,
+            marginBottom: 10,
+            paddingHorizontal: 12,
+            borderRadius: 20,
+            flex: 1
+          }}
+        />
+
+        {
+          searchQuery !== "" &&
+            <CircleBtn
+              style={{
+                position: "absolute",
+                right: 18,
+                backgroundColor: "transparent",
+                top: -2
+              }}
+              color={Colors.themeColor(state.theme).btnColor}
+              onPress={() => {
+                searchItem("");
+              }}>
+              <Feather name={"x"} size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).error} />
+            </CircleBtn>
         }
 
-        rightElement={SETTINGS && <CircleBtn
-          color={Colors.themeColor(state.theme).btnColor}
-          onPress={() => navigation.navigate("Settings")}>
-          <Feather name="settings" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />
-        </CircleBtn> }
-      />
+      </Animated.View>
+      {/* } */}
 
       {
-        notes.length !== 0 ? <FlatList
-          style={{ flex: 1 }}
-          data={data1()}
-          renderItem={renderItem}
-          keyExtractor={(item) => keyExtractor(item)}
-        /> : <Pressable onPress={() => navigation.navigate("NoteDetails")}>
+        notes.length === 0 ? <Pressable onPress={() => navigation.navigate("NoteDetails")}>
           <NoDataMessage
             icon={<Feather name="alert-octagon" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />}
             text={localization("noDataText")}
             style={{ marginTop: Typography.FONT_SIZE_TITLE_MD }}
             textStyle={{ marginLeft: Typography.FONT_SIZE_TITLE_MD * 0.5 }}/>
-        </Pressable>
-
+        </Pressable> : searchResult.length !== 0 ? <FlatList
+          style={{ flex: 1, marginTop: Typography.FONT_SIZE_MEDIUM }}
+          data={data1()}
+          renderItem={renderItem}
+          keyExtractor={(item) => keyExtractor(item)}
+        /> : <View>
+          <NoDataMessage
+            icon={<Feather name="alert-octagon" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />}
+            text={localization("searchEmpty")}
+            style={{ marginTop: Typography.FONT_SIZE_TITLE_MD }}
+            textStyle={{ marginLeft: Typography.FONT_SIZE_TITLE_MD * 0.5 }}/>
+        </View>
       }
 
-      <View style={[{ position: "absolute", bottom: Typography.FONT_SIZE_TITLE_MD * 2, right: Typography.FONT_SIZE_TITLE_MD * 2 }, SharedStyles.shadow.elevation5]}>
+      <View style={[{ position: "absolute", bottom: bottom + Typography.FONT_SIZE_TITLE_MD * 2, right: Typography.FONT_SIZE_TITLE_MD * 2 }, SharedStyles.shadow.elevation5]}>
         <CircleBtn
           color={Colors.themeColor(state.theme).secondary}
           onPress={() => navigation.navigate("NoteDetails")}

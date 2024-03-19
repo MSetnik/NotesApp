@@ -24,7 +24,8 @@ const hr = {
   eMail: "E-mail",
   loginTitle: "Prijava",
   registerTitle: "Registriraj se",
-  confirmPassword: "Potvrdi lozinku"
+  confirmPassword: "Potvrdi lozinku",
+  searchEmpty: "Nema bilješki na temelju tvoje pretrage."
 };
 
 export default hr;
