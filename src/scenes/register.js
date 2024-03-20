@@ -25,6 +25,8 @@ import { actions, createAction } from "../store/actions";
 // import { getAuth, onAuthStateChanged, FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 import { Firebase } from "../firebase-config";
 import { localization } from "../localization";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { storeUser } from "../helpers/async-storage-helper";
 
 const Register = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -41,7 +43,7 @@ const Register = ({ navigation }) => {
   const state = store.state;
   const dispatch = store.dispatch;
   // firebase.initializeApp(firebaseConfig);
-  const auth = Firebase.auth();
+  const auth = getAuth();
 
   const validateEmail = () => {
     const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -86,13 +88,16 @@ const Register = ({ navigation }) => {
     try {
       if (email !== "" && password !== "") {
         console.log("success");
-        await auth.createUserWithEmailAndPassword(email, password)
+        await createUserWithEmailAndPassword(auth, email, password)
           .then(resp => {
-            dispatch(createAction(actions.USER_LOGIN, resp.user.email));
+            console.log(resp);
+            dispatch(createAction(actions.USER_LOGIN, resp.user));
+            dispatch(createAction(actions.ADD_NOTE, []));
+            storeUser(resp.user);
           });
       }
     } catch (error) {
-      console.log(error.code);
+      console.log(error);
       if (error.code === "auth/email-already-in-use") {
         alert(localization("emailInUseMsg"));
         return;

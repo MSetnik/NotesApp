@@ -1,8 +1,8 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { View, Text, FlatList, ActivityIndicator, Pressable, TextInput } from "react-native";
 
 // Reanimated
-import Animated, { useSharedValue, withTiming, Easing, ReduceMotion } from "react-native-reanimated";
+import Animated, { useSharedValue, withTiming, Easing, ReduceMotion, useAnimatedStyle } from "react-native-reanimated";
 
 // Status Bar
 import { StatusBar } from "expo-status-bar";
@@ -22,6 +22,9 @@ import { StoreContext } from "../store/reducer";
 import { localization } from "../localization";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useFocusEffect } from "@react-navigation/native";
+import { FONT_SIZE_TITLE_MD } from "../styles/typography";
+
 const SETTINGS = true;
 
 const Home = ({ navigation }) => {
@@ -31,12 +34,35 @@ const Home = ({ navigation }) => {
   const notes = store.state.notes;
 
   const textInputRef = useRef(null);
+  const flatListRef = useRef(null);
 
   const marginTop = useSharedValue(-60);
 
   const [textInputVisible, setTextInputVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState(notes);
+
+  useEffect(() => {
+    setSearchResult(notes);
+  }, [notes]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        // alert("Screen was unfocused");
+        setTextInputVisible(false);
+        marginTop.value = withTiming(-60, {
+          duration: 200,
+          easing: Easing.inOut(Easing.quad),
+          reduceMotion: ReduceMotion.System
+        });
+
+        textInputRef.current.blur();
+
+        // Useful for cleanup functions
+      };
+    }, [])
+  );
 
   // Formatiranje JSON podataka za ispis
   const data1 = () => {
@@ -91,12 +117,16 @@ const Home = ({ navigation }) => {
           item.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setSearchResult(result);
-
-      console.log(result);
     } else {
       setSearchResult(notes);
     }
   };
+
+  const animatedStyles = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: marginTop.value }]
+    };
+  });
 
   if (store.state.isLoading) {
     return (
@@ -122,9 +152,9 @@ const Home = ({ navigation }) => {
           leftElement={
             <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL * 2, color: Colors.themeColor(state.theme).textColor }}>{localization("notes")}</Text>
           }
-
           rightElement={SETTINGS && <View style={{ flexDirection: "row" }}>
             <CircleBtn
+              disabled={notes.length === 0}
               color={Colors.themeColor(state.theme).btnColor}
               onPress={() => {
                 searchItem("");
@@ -138,17 +168,16 @@ const Home = ({ navigation }) => {
                   });
 
                   textInputRef.current.blur();
+                } else {
+                  setTextInputVisible(true);
+                  marginTop.value = withTiming(0, {
+                    duration: 200,
+                    easing: Easing.inOut(Easing.quad),
+                    reduceMotion: ReduceMotion.System
+                  });
 
-                  return;
+                  textInputRef.current.focus();
                 }
-                setTextInputVisible(true);
-                marginTop.value = withTiming(0, {
-                  duration: 200,
-                  easing: Easing.inOut(Easing.quad),
-                  reduceMotion: ReduceMotion.System
-                });
-
-                textInputRef.current.focus();
               }}>
               <Feather name={!textInputVisible ? "search" : "x" } size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />
             </CircleBtn>
@@ -163,12 +192,10 @@ const Home = ({ navigation }) => {
 
       </View>
 
-      {/* {
-        textInputVisible && */}
-      <Animated.View style={{
-        flexDirection: "row",
-        marginTop: marginTop
-      }}>
+      <Animated.View style={[{
+        flexDirection: "row"
+        // marginTop: marginTop
+      }, animatedStyles]}>
         <TextInput
           ref={textInputRef}
           placeholder="Search"
@@ -180,7 +207,6 @@ const Home = ({ navigation }) => {
             marginHorizontal: "2%",
             height: 40,
             borderWidth: 1,
-            marginBottom: 10,
             paddingHorizontal: 12,
             borderRadius: 20,
             flex: 1
@@ -205,18 +231,19 @@ const Home = ({ navigation }) => {
         }
 
       </Animated.View>
-      {/* } */}
 
       {
-        notes.length === 0 ? <Pressable onPress={() => navigation.navigate("NoteDetails")}>
+        notes.length === 0 ? <Pressable onPress={() => navigation.navigate("NoteDetails")} style={{ marginTop: -50 }}>
           <NoDataMessage
             icon={<Feather name="alert-octagon" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />}
             text={localization("noDataText")}
             style={{ marginTop: Typography.FONT_SIZE_TITLE_MD }}
             textStyle={{ marginLeft: Typography.FONT_SIZE_TITLE_MD * 0.5 }}/>
-        </Pressable> : searchResult.length !== 0 ? <FlatList
-          style={{ flex: 1, marginTop: Typography.FONT_SIZE_MEDIUM }}
+        </Pressable> : searchResult.length !== 0 ? <Animated.FlatList
+          ref={flatListRef}
+          style={[{ flex: 1, marginTop: Typography.FONT_SIZE_TITLE_MD, marginBottom: -bottom }, animatedStyles]}
           data={data1()}
+          contentContainerStyle={{ paddingBottom: bottom * 1.5 }}
           renderItem={renderItem}
           keyExtractor={(item) => keyExtractor(item)}
         /> : <View>

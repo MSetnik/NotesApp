@@ -40,7 +40,6 @@ export const typography = StyleSheet.create({
   },
   titleMedium: {
     fontSize: Typography.FONT_SIZE_TITLE_MD,
-    lineHeight: Typography.LINE_HEIGHT_TITLE_MD,
     letterSpacing: Typography.LETTER_SPACING,
     fontWeight: Typography.FONT_WEIGHT_BOLD
   },

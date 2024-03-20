@@ -13,19 +13,17 @@ import { SharedStyles, Colors, Typography } from "../styles";
 // Components
 import { CircleBtn } from "../components/atoms";
 
-// Linear gradient
-import { LinearGradient } from "expo-linear-gradient";
-
 // Store
 import { StoreContext } from "../store/reducer";
 import { actions, createAction } from "../store/actions";
 
 // Firebase
-import { Firebase } from "../firebase-config";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 // Localization
 import { localization } from "../localization";
-import { getAuth } from "firebase/auth";
+import { getStoredLocalNotes, storeUser } from "../helpers/async-storage-helper";
+import { getUserNotes } from "../endpoint/firestore";
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -46,13 +44,19 @@ const Login = ({ navigation }) => {
       if (email !== "" && password !== "") {
         setIsLoading(true);
 
-        await auth.signInWithEmailAndPassword(email, password)
-          .then(resp => {
+        await signInWithEmailAndPassword(auth, email, password)
+          .then(async (resp) => {
+            const userNotes = await getUserNotes(resp.user.uid);
             console.log(resp);
             setIsLoading(false);
             setLoginError(false);
 
-            dispatch(createAction(actions.USER_LOGIN, email));
+            console.log(userNotes);
+
+            dispatch(createAction(actions.USER_LOGIN, resp.user));
+            dispatch(createAction(actions.ADD_NOTE, []));
+
+            storeUser(resp.user);
           });
       }
     } catch (error) {
@@ -61,6 +65,14 @@ const Login = ({ navigation }) => {
       console.log(error);
       setIsLoading(false);
     }
+  };
+
+  const loginAsGuest = async () => {
+    const localNotes = await getStoredLocalNotes();
+
+    dispatch(createAction(actions.USER_LOGIN, "Guest"));
+    dispatch(createAction(actions.ADD_NOTE, localNotes));
+    storeUser({ email: "Guest" });
   };
 
   return (
@@ -102,8 +114,8 @@ const Login = ({ navigation }) => {
               borderBottomWidth: 1,
               borderColor: loginError !== null ? !loginError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
               color: Colors.themeColor(state.theme).textColor,
-              fontWeight: "normal"
-
+              fontWeight: "normal",
+              textTransform: "none"
             }]} />
 
         </View>
@@ -138,7 +150,8 @@ const Login = ({ navigation }) => {
               borderBottomWidth: 1,
               borderColor: loginError !== null ? !loginError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
               color: Colors.themeColor(state.theme).textColor,
-              fontWeight: "normal"
+              fontWeight: "normal",
+              textTransform: "none"
             }]} />
 
         </View>
@@ -184,7 +197,9 @@ const Login = ({ navigation }) => {
           }}>
             {localization("or")}
           </Text>
-          <Pressable onPress={() => dispatch(createAction(actions.USER_LOGIN, "Guest"))}>
+          <Pressable onPress={() => {
+            loginAsGuest();
+          }}>
             <Text style={[SharedStyles.typography.titleNormal, {
               fontWeight: "bold",
               color: Colors.themeColor(state.theme).textColor

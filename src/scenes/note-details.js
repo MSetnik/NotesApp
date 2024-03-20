@@ -1,5 +1,8 @@
 import React, { useRef, useState, useContext, useEffect } from "react";
-import { View, Text, TextInput, KeyboardAvoidingView, Platform, Pressable, LogBox } from "react-native";
+import { View, Text, TextInput, KeyboardAvoidingView, Platform, Pressable, LogBox, AppState } from "react-native";
+
+// UUID
+import * as Crypto from "expo-crypto";
 
 // Styles
 import { Colors, SharedStyles, Typography } from "../styles";
@@ -27,6 +30,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // Constants
 import { ASYNC_STORAGE_KEY } from "../constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { addUserNote, deleteUserNote, updateUserNote } from "../endpoint/firestore";
 
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state"
@@ -50,11 +54,12 @@ const NoteDetails = ({ navigation, route }) => {
   const editText = useRef(null);
 
   let note;
-  const date = new Date();
 
   if (route.params !== undefined) {
     note = route.params.item;
   }
+
+  const date = new Date();
 
   const [title, setTitle] = useState(note !== undefined ? note.title : "");
   const [content, setContent] = useState(note !== undefined ? note.content : "");
@@ -64,6 +69,9 @@ const NoteDetails = ({ navigation, route }) => {
   const noteTitle = useRef(title);
   const noteContent = useRef(content);
 
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+
   useEffect(() => {
     // navigation.addListener("blur", () => {
     //   if (note !== undefined) {
@@ -72,6 +80,25 @@ const NoteDetails = ({ navigation, route }) => {
     //     addNote(true, noteTitle.current, noteContent.current);
     //   }
     // });
+    const subscription = AppState.addEventListener("change", nextAppState => {
+      if (
+        appState.current.match(/active/) && (nextAppState === "background" || nextAppState === "inactive")
+      ) {
+        if (note !== undefined) {
+          saveNote(true, noteTitle.current, noteContent.current);
+        } else {
+          addNote(true, title, content);
+        }
+      }
+
+      appState.current = nextAppState;
+      setAppStateVisible(appState.current);
+      console.log("AppState", appState.current);
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, []);
 
   const storeDataAsyncStorage = async (value) => {
@@ -96,7 +123,11 @@ const NoteDetails = ({ navigation, route }) => {
   };
 
   const saveNote = (navigationOnBlur = false, title, content) => {
+    const saveNoteDate = new Date();
+
     const newNotesData = state.notes;
+
+    console.log("saveNote 1");
 
     state.notes.forEach((n, index) => {
       if (note.id === n.id) {
@@ -104,16 +135,22 @@ const NoteDetails = ({ navigation, route }) => {
           id: n.id,
           title: title,
           content: content,
-          date: date,
+          date: saveNoteDate.toString(),
           color: n.color
 
         };
+
+        console.log("saveNote 2", newNoteData);
 
         if (newNoteData.id !== n.id || newNoteData.title !== n.title || newNoteData.content !== n.content) {
           newNotesData.splice(index, 1);
           newNotesData.splice(0, 0, newNoteData);
 
           dispatch(createAction(actions.ADD_NOTE, newNotesData));
+
+          console.log("saveNote 3");
+
+          updateUserNote(state.user.uid, note.firestoreId, newNoteData);
 
           storeDataAsyncStorage(newNotesData);
         }
@@ -140,15 +177,20 @@ const NoteDetails = ({ navigation, route }) => {
   };
 
   const addNote = (navigationOnBlur = false, title, content) => {
+    const addNoteDate = new Date();
+
     const newNotesData = state.notes;
     const newNoteData = {
       id: getNextId(),
+      uuid: Crypto.randomUUID(),
       title: title,
       content: content,
-      date: date,
+      date: addNoteDate,
       color: getRandomColor()
 
     };
+
+    addUserNote(state.user.uid, newNoteData);
 
     newNotesData.unshift(newNoteData);
 
@@ -171,7 +213,7 @@ const NoteDetails = ({ navigation, route }) => {
     });
 
     dispatch(createAction(actions.ADD_NOTE, state.notes));
-
+    deleteUserNote(state.user.uid, note.firestoreId);
     storeDataAsyncStorage(state.notes);
 
     navigation.goBack();
@@ -226,7 +268,7 @@ const NoteDetails = ({ navigation, route }) => {
         style={{ paddingHorizontal: Typography.FONT_SIZE_TITLE_MD, flex: 1 }}>
         <TextInput style={[SharedStyles.typography.titleMedium, {
           flexDirection: "row",
-          marginTop: Typography.FONT_SIZE_TITLE_MD * 0.5,
+          marginTop: Typography.FONT_SIZE_TITLE_MD * 2,
           fontWeight: "bold",
           color: Colors.themeColor(state.theme).textColor
         }]}

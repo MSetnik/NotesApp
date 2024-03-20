@@ -21,14 +21,13 @@ import { Feather } from "@expo/vector-icons";
 import { StoreContext } from "../store/reducer";
 import { actions, createAction } from "../store/actions";
 
-// Async Storage
-// import AsyncStorage from "@react-native-async-storage/async-storage";
-
 // Firebase
-import { Firebase } from "../firebase-config";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getAuth, signOut } from "firebase/auth";
+import { storeUser } from "../helpers/async-storage-helper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const appVersion = Constants.appVersion;
+const appVersion = Constants.expoConfig.version;
 
 const Settings = ({ navigation }) => {
   const { top } = useSafeAreaInsets();
@@ -36,14 +35,16 @@ const Settings = ({ navigation }) => {
   const state = store.state;
   const dispatch = store.dispatch;
 
+  const auth = getAuth();
+
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(state.theme !== "light");
 
   const logout = () => {
-    Firebase.auth()
-      .signOut()
+    signOut(auth)
       .then(() => {
         console.log("User signed out!");
         dispatch(createAction(actions.USER_LOGIN, null));
+        storeUser(null);
       });
   };
 
@@ -60,11 +61,11 @@ const Settings = ({ navigation }) => {
   };
 
   const saveThemeAsyncStorage = async (theme) => {
-    // try {
-    //   await AsyncStorage.setItem(THEME_KEY, theme);
-    // } catch (e) {
-    //   console.log(e);
-    // }
+    try {
+      await AsyncStorage.setItem(THEME_KEY, theme);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -96,7 +97,7 @@ const Settings = ({ navigation }) => {
         <Text style={[SharedStyles.typography.subtitle, { color: Colors.themeColor(state.theme).textColor }]}>User</Text>
         <View style={styles.dataContainer}>
           <View style={[styles.dataItem, { borderColor: Colors.themeColor(state.theme).textColor }]}>
-            <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>{state.user}</Text>
+            <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>{state.user.email}</Text>
           </View>
         </View>
 
@@ -124,12 +125,12 @@ const Settings = ({ navigation }) => {
       </View>
 
       <View style={[styles.container, { color: Colors.themeColor(state.theme).textColor, borderColor: Colors.themeColor(state.theme).textColor, justifyContent: "flex-start", flex: 1 }]}>
-        <CircleBtn color={ state.user === "Guest" ? Colors.themeColor(state.theme).secondary : Colors.themeColor(state.theme).error} style={{ marginBottom: Typography.FONT_SIZE_TITLE_MD, justifyContent: "center", alignItems: "center" }}
+        <CircleBtn color={ state.user.email === "Guest" ? Colors.themeColor(state.theme).secondary : Colors.themeColor(state.theme).error} style={{ marginBottom: Typography.FONT_SIZE_TITLE_MD, justifyContent: "center", alignItems: "center" }}
           onPress={() => logout()}
         >
           {
             <Text style={[SharedStyles.typography.button, { color: Colors.themeColor("dark").textColor }]}>{
-              state.user === "Guest" ? localization("login") : localization("logout")
+              state.user.email === "Guest" ? localization("login") : localization("logout")
             }</Text>
           }
         </CircleBtn>

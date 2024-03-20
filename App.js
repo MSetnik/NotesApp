@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useCallback, useEffect, useReducer, useState } from "react";
 
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 
@@ -21,9 +21,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ASYNC_STORAGE_KEY, THEME_KEY } from "./src/constants";
 
 // Firebase
-import { Firebase, auth } from "./src/firebase-config";
 import { Colors } from "./src/styles";
 import { getAuth } from "firebase/auth";
+import { getStoredUser } from "./src/helpers/async-storage-helper";
+
+// Splash Screen
+import * as SplashScreen from "expo-splash-screen";
+import { getUserNotes } from "./src/endpoint/firestore";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function App () {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -34,20 +40,40 @@ export default function App () {
 
     const getDataAsyncStorage = async () => {
       try {
-        const value = await AsyncStorage.getItem(ASYNC_STORAGE_KEY);
+        const notes = JSON.parse(await AsyncStorage.getItem(ASYNC_STORAGE_KEY));
+        const userData = await getStoredUser();
         const theme = await AsyncStorage.getItem(THEME_KEY);
 
-        if (value !== null) {
-          dispatch(createAction(actions.ADD_NOTE, JSON.parse(value)));
+        if (userData) {
+          dispatch(createAction(actions.USER_LOGIN, userData));
+        }
+
+        if (notes !== null) {
+          if (userData && userData.email === "Guest") {
+            dispatch(createAction(actions.ADD_NOTE, notes));
+          } else if (userData && userData.email !== "Guest") {
+            getUserNotes(userData.uid, dispatch)
+              .then(async () => {
+                setInitializing(false);
+                await SplashScreen.hideAsync();
+              });
+            // dispatch(createAction(actions.ADD_NOTE, userNotes));
+          }
           dispatch(createAction(actions.SET_THEME, theme));
           dispatch(createAction(actions.END_LOADER));
+
+          return;
         } else {
           dispatch(createAction(actions.ADD_NOTE, []));
           dispatch(createAction(actions.SET_THEME, theme));
           dispatch(createAction(actions.END_LOADER));
         }
+
+        setInitializing(false);
+
+        await SplashScreen.hideAsync();
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     };
 
@@ -58,11 +84,19 @@ export default function App () {
   const [initializing, setInitializing] = useState(true);
 
   // Handle user state changes
-  function onAuthStateChanged (user) {
+  async function onAuthStateChanged (user) {
     if (user && user !== null) {
       dispatch(createAction(actions.USER_LOGIN, user.email));
+
+      if (user.email === "Guest") {
+        const notes = JSON.parse(await AsyncStorage.getItem(ASYNC_STORAGE_KEY));
+
+        dispatch(createAction(actions.ADD_NOTE, notes));
+      } else {
+        dispatch(createAction(actions.ADD_NOTE, []));
+      }
     }
-    if (initializing) setInitializing(false);
+    // if (initializing) setInitializing(false);
   }
 
   let auth;
@@ -70,7 +104,11 @@ export default function App () {
     if (!auth) {
       auth = getAuth();
     }
-    const subscriber = onAuthStateChanged(auth, (user) => onAuthStateChanged(user));
+
+    const subscriber = async () => {
+      await onAuthStateChanged(auth, (user) => onAuthStateChanged(user));
+    };
+
     return subscriber; // unsubscribe on unmount
   }, []);
 
@@ -85,7 +123,7 @@ export default function App () {
   if (!state.user) {
     return (
       <StoreContext.Provider value={{ dispatch, state }}>
-        <NavigationContainer>
+        <NavigationContainer >
           <LoginStack/>
         </NavigationContainer>
       </StoreContext.Provider>
