@@ -32,6 +32,12 @@ export const reducer = (state = initialState, action) => {
         notes: action.payload
       };
 
+    case actions.ADD_LOCAL_NOTES:
+      return {
+        ...state,
+        localNotes: action.payload
+      };
+
     case actions.USER_LOGIN:
       return {
         ...state,

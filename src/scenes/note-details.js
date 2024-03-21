@@ -93,7 +93,6 @@ const NoteDetails = ({ navigation, route }) => {
 
       appState.current = nextAppState;
       setAppStateVisible(appState.current);
-      console.log("AppState", appState.current);
     });
 
     return () => {
@@ -127,8 +126,6 @@ const NoteDetails = ({ navigation, route }) => {
 
     const newNotesData = state.notes;
 
-    console.log("saveNote 1");
-
     state.notes.forEach((n, index) => {
       if (note.id === n.id) {
         const newNoteData = {
@@ -140,19 +137,18 @@ const NoteDetails = ({ navigation, route }) => {
 
         };
 
-        console.log("saveNote 2", newNoteData);
-
         if (newNoteData.id !== n.id || newNoteData.title !== n.title || newNoteData.content !== n.content) {
           newNotesData.splice(index, 1);
           newNotesData.splice(0, 0, newNoteData);
 
           dispatch(createAction(actions.ADD_NOTE, newNotesData));
-
-          console.log("saveNote 3");
+          dispatch(createAction(actions.ADD_LOCAL_NOTES, newNotesData));
 
           updateUserNote(state.user.uid, note.firestoreId, newNoteData);
 
-          storeDataAsyncStorage(newNotesData);
+          if (state.user.email === "Guest") {
+            storeDataAsyncStorage(newNotesData);
+          }
         }
       }
     });
@@ -190,11 +186,18 @@ const NoteDetails = ({ navigation, route }) => {
 
     };
 
-    addUserNote(state.user.uid, newNoteData);
+    if (state.user.email !== "Guest") {
+      addUserNote(state.user.uid, newNoteData);
+    }
 
     newNotesData.unshift(newNoteData);
 
-    dispatch(createAction(actions.ADD_NOTE, newNotesData));
+    if (state.user.email !== "Guest") {
+      dispatch(createAction(actions.ADD_NOTE, newNotesData));
+    } else {
+      dispatch(createAction(actions.ADD_NOTE, newNotesData));
+      dispatch(createAction(actions.ADD_LOCAL_NOTES, newNotesData));
+    }
 
     storeDataAsyncStorage(newNotesData);
 
@@ -213,8 +216,12 @@ const NoteDetails = ({ navigation, route }) => {
     });
 
     dispatch(createAction(actions.ADD_NOTE, state.notes));
-    deleteUserNote(state.user.uid, note.firestoreId);
-    storeDataAsyncStorage(state.notes);
+
+    if (state.user.email !== "Guest") {
+      deleteUserNote(state.user.uid, note.firestoreId);
+    } else {
+      storeDataAsyncStorage(state.notes);
+    }
 
     navigation.goBack();
   };

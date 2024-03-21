@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { StyleSheet, Text, View, Switch, Platform } from "react-native";
+import { StyleSheet, Text, View, Switch, Platform, Pressable, Alert } from "react-native";
 
 // Constants
 import Constants from "expo-constants";
@@ -24,8 +24,9 @@ import { actions, createAction } from "../store/actions";
 // Firebase
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getAuth, signOut } from "firebase/auth";
-import { storeUser } from "../helpers/async-storage-helper";
+import { storeLocalNotes, storeUser } from "../helpers/async-storage-helper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { addUserNote } from "../endpoint/firestore";
 
 const appVersion = Constants.expoConfig.version;
 
@@ -44,6 +45,7 @@ const Settings = ({ navigation }) => {
       .then(() => {
         console.log("User signed out!");
         dispatch(createAction(actions.USER_LOGIN, null));
+        dispatch(createAction(actions.ADD_NOTE, []));
         storeUser(null);
       });
   };
@@ -65,6 +67,21 @@ const Settings = ({ navigation }) => {
       await AsyncStorage.setItem(THEME_KEY, theme);
     } catch (e) {
       console.log(e);
+    }
+  };
+
+  const syncLocalNotesWithFirestore = async () => {
+    try {
+      await state.localNotes.forEach(async (note) => {
+        await addUserNote(state.user.uid, note);
+      });
+
+      dispatch(createAction(actions.ADD_LOCAL_NOTES, []));
+      await storeLocalNotes([]);
+
+      Alert.alert("Sinkronizacija uspješna");
+    } catch (e) {
+      Alert.alert("Greška kod sinkronizacije. Pokušajte ponovno kasnije.");
     }
   };
 
@@ -101,7 +118,7 @@ const Settings = ({ navigation }) => {
           </View>
         </View>
 
-        <Text style={[SharedStyles.typography.subtitle, { color: Colors.themeColor(state.theme).textColor }]}>{localization("theme")}</Text>
+        <Text style={[SharedStyles.typography.subtitle, { color: Colors.themeColor(state.theme).textColor }]}>{localization("appSettings")}</Text>
         <View style={styles.dataContainer}>
           <View style={[styles.dataItem, { borderColor: Colors.themeColor(state.theme).textColor }]}>
             <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>{localization("darkMode")}</Text>
@@ -113,7 +130,23 @@ const Settings = ({ navigation }) => {
               value={isDarkModeEnabled}
             />
           </View>
+          {
+            state.user.email !== "Guest" && state.localNotes.length !== 0 &&
+            <Pressable
+              style={[styles.dataItem, { borderColor: Colors.themeColor(state.theme).textColor }]}
+              onPress={() => {
+                syncLocalNotesWithFirestore();
+              }}
+            >
+              <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>{localization("syncNotes")}</Text>
+              <View style={{}}>
+                <Feather name="chevron-right" size={18}/>
+              </View>
+            </Pressable>
+          }
+
         </View>
+
         <Text style={[SharedStyles.typography.subtitle, { color: Colors.themeColor(state.theme).textColor }]}>{localization("about")}</Text>
         <View style={styles.dataContainer}>
           <View style={[styles.dataItem, { color: Colors.themeColor(state.theme).textColor, borderColor: Colors.themeColor(state.theme).textColor }]}>

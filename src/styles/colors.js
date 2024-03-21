@@ -10,6 +10,7 @@
 // Theme colors
 export const darkTheme = {
   primary: "#4AA4F4",
+  primaryDark: "#0a529e",
   secondary: "#3DF5AF",
   background: "#000000",
   card1: "#EBB8B8",
@@ -36,6 +37,7 @@ export const darkTheme = {
 
 export const lightTheme = {
   primary: "#4AA4F4",
+  primaryDark: "#0a529e",
   secondary: "#5E58F6",
   background: "#FFFFFF",
   card1: "#EBB8B8",

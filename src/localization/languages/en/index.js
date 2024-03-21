@@ -8,6 +8,7 @@ const en = {
   theme: "Theme",
   darkMode: "Dark mode",
   appVersion: "App version",
+  appSettings: "App Settings",
   about: "About",
   emailErrorMsg: "Email is not correct format",
   emailInUseMsg: "Email is already in use",
@@ -26,7 +27,10 @@ const en = {
   loginTitle: "Login",
   registerTitle: "Register",
   confirmPassword: "Confirm password",
-  searchEmpty: "No notes found. Try with different search."
+  searchEmpty: "No notes found. Try with different search.",
+  verifyMail: "Verification",
+  verifyHelpText: "Please follow instructions that is being sent to your email address.",
+  syncNotes: "Sync notes with account"
 
 };
 

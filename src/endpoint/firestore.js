@@ -4,6 +4,8 @@ import { doc, addDoc, collection, updateDoc, onSnapshot, query, deleteDoc, order
 import { actions, createAction } from "../store/actions";
 
 export const getUserNotes = async (userId, dispatch) => {
+  dispatch(createAction(actions.NOTES_LOADER, true));
+
   new Promise((resolve, reject) => {
     const q = query(collection(db, "users", userId, "notes"), orderBy("date", "desc"));
     onSnapshot(q, { includeMetadataChanges: true }, (querySnapshot) => {
@@ -14,9 +16,9 @@ export const getUserNotes = async (userId, dispatch) => {
         notes.push({ firestoreId: doc.id, ...doc.data() });
       });
 
-      console.log(notes, "NOTES");
+      dispatch(createAction(actions.NOTES_LOADER, false));
       dispatch(createAction(actions.ADD_NOTE, notes));
-      resolve();
+      resolve(notes);
     },
     (error) => {
       reject(error);

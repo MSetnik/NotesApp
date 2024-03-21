@@ -6,6 +6,7 @@ const hr = {
   noDataText: "Klikni na + kako bi dodao prvu bilješku!",
   settingsTitle: "Postavke",
   theme: "Tema",
+  appSettings: "Postavke aplikacije",
   darkMode: "Tamni način",
   appVersion: "Verzija",
   about: "O aplikaciji",
@@ -25,7 +26,10 @@ const hr = {
   loginTitle: "Prijava",
   registerTitle: "Registriraj se",
   confirmPassword: "Potvrdi lozinku",
-  searchEmpty: "Nema bilješki na temelju tvoje pretrage."
+  searchEmpty: "Nema bilješki na temelju tvoje pretrage.",
+  verifyMail: "Potvrdi email",
+  verifyHelpText: "Slijedite upute koje smo vam poslali na email kako bi potvrdili svoju email adresu.",
+  syncNotes: "Poveži bilješke sa računom"
 };
 
 export default hr;

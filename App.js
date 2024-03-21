@@ -51,6 +51,7 @@ export default function App () {
         if (notes !== null) {
           if (userData && userData.email === "Guest") {
             dispatch(createAction(actions.ADD_NOTE, notes));
+            dispatch(createAction(actions.ADD_LOCAL_NOTES, notes));
           } else if (userData && userData.email !== "Guest") {
             getUserNotes(userData.uid, dispatch)
               .then(async () => {
@@ -61,8 +62,6 @@ export default function App () {
           }
           dispatch(createAction(actions.SET_THEME, theme));
           dispatch(createAction(actions.END_LOADER));
-
-          return;
         } else {
           dispatch(createAction(actions.ADD_NOTE, []));
           dispatch(createAction(actions.SET_THEME, theme));
@@ -91,6 +90,7 @@ export default function App () {
       if (user.email === "Guest") {
         const notes = JSON.parse(await AsyncStorage.getItem(ASYNC_STORAGE_KEY));
 
+        dispatch(createAction(actions.ADD_NOTE, notes));
         dispatch(createAction(actions.ADD_NOTE, notes));
       } else {
         dispatch(createAction(actions.ADD_NOTE, []));

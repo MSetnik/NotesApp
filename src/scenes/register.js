@@ -1,14 +1,14 @@
-import React, { useState, useContext } from "react";
-import { Pressable, Text, TextInput, View, KeyboardAvoidingView, Alert } from "react-native";
+import React, { useState, useContext, useCallback, useEffect, useRef } from "react";
+import { Pressable, Text, TextInput, View, KeyboardAvoidingView, Alert, Image, Dimensions, AppState } from "react-native";
 
 // Constants
 import Constants from "expo-constants";
 
 // Icons
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Feather } from "@expo/vector-icons";
 
 // Sharedstyles
-import { SharedStyles, Colors } from "../styles";
+import { SharedStyles, Colors, Typography } from "../styles";
 
 // Components
 import { CircleBtn } from "../components/atoms";
@@ -25,10 +25,11 @@ import { actions, createAction } from "../store/actions";
 // import { getAuth, onAuthStateChanged, FacebookAuthProvider, signInWithCredential } from "firebase/auth";
 import { Firebase } from "../firebase-config";
 import { localization } from "../localization";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { createUserWithEmailAndPassword, getAuth, sendEmailVerification, sendSignInLinkToEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { storeUser } from "../helpers/async-storage-helper";
 
 const Register = ({ navigation }) => {
+  const appState = useRef(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,12 +39,27 @@ const Register = ({ navigation }) => {
   const [confirmPasswordError, setConfirmPasswordError] = useState(null);
   const [passwordErrorMsg, setPasswordErrorMsg] = useState("");
   const [emailError, setEmailError] = useState(null);
+  const [waitingForVerification, setWaitingForVerification] = useState(false);
 
   const store = useContext(StoreContext);
   const state = store.state;
   const dispatch = store.dispatch;
   // firebase.initializeApp(firebaseConfig);
   const auth = getAuth();
+
+  useEffect(() => {
+    const subscriber = AppState.addEventListener("change", (state) => {
+      console.log(appState);
+      console.log(state);
+      if (state === "active" && appState.current.match(/inactive|background/) && waitingForVerification) {
+        navigation.goBack();
+      }
+
+      appState.current = state;
+    });
+
+    return () => subscriber.remove();
+  }, []);
 
   const validateEmail = () => {
     const reg = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
@@ -90,10 +106,17 @@ const Register = ({ navigation }) => {
         console.log("success");
         await createUserWithEmailAndPassword(auth, email, password)
           .then(resp => {
+            sendEmailVerification(resp.user)
+              .then(() => {
+                setWaitingForVerification(true);
+              });
+            // sendSignInLinkToEmail(auth, email, actionCodeSettings);
             console.log(resp);
-            dispatch(createAction(actions.USER_LOGIN, resp.user));
-            dispatch(createAction(actions.ADD_NOTE, []));
-            storeUser(resp.user);
+
+            // TODO:
+            // dispatch(createAction(actions.USER_LOGIN, resp.user));
+            // dispatch(createAction(actions.ADD_NOTE, []));
+            // storeUser(resp.user);
           });
       }
     } catch (error) {
@@ -144,137 +167,154 @@ const Register = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1, paddingTop: Constants.statusBarHeight + 20, alignItems: "center", backgroundColor: Colors.themeColor(state.theme).background }}>
-      <Text style={{ fontSize: 40, marginTop: 40, color: Colors.themeColor(state.theme).primary, fontWeight: "600" }}>
-        {localization("register")}
+      <CircleBtn
+        style={{ marginLeft: Typography.FONT_SIZE_NORMAL, alignSelf: "start" }}
+        color={Colors.themeColor(state.theme).btnColor}
+        onPress={() => navigation.goBack()}>
+        <Feather name="arrow-left" size={Typography.FONT_SIZE_TITLE_MD} color={Colors.themeColor(state.theme).textColor} />
+      </CircleBtn>
+      <Text style={{ fontSize: 40, marginTop: Typography.FONT_SIZE_TITLE_MD, color: Colors.themeColor(state.theme).primary, fontWeight: "600" }}>
+        {waitingForVerification ? localization("verifyMail") : localization("register")}
       </Text>
 
-      <KeyboardAvoidingView
-        behavior={"padding"}
-        style={{ justifyContent: "center", marginTop: 100, width: "80%" }}>
+      {
+        waitingForVerification ? <View style={{ flex: 1, alignItems: "center", marginTop: Typography.FONT_SIZE_TITLE_MD * 5 }}>
+          <Image source={require("../assets/2921440_26822.jpg")} style={{ width: 200, height: 200 }}/>
+          <Text style={[SharedStyles.typography.bodyMedum, {
+            flexDirection: "row",
+            textAlign: "center",
+            color: Colors.themeColor().primaryDark,
+            width: Dimensions.get("window").width / 1.3
+          }]}>{localization("verifyHelpText")}</Text>
+        </View> : <KeyboardAvoidingView
+          behavior={"padding"}
+          style={{ justifyContent: "center", marginTop: 100, width: "80%" }}>
 
-        <View style={{ marginBottom: 20 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-            <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
-              {localization("eMail")}
-            </Text>
+          <View style={{ marginBottom: 20 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
+              <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
+                {localization("eMail")}
+              </Text>
+
+              {
+                emailError !== null ? !emailError ? <AntDesign
+                  name="checkcircleo"
+                  size={20}
+                  color={Colors.themeColor(state.theme).success}
+                /> : <AntDesign
+                  name="exclamationcircleo"
+                  size={20}
+                  color={Colors.themeColor(state.theme).warning}
+                /> : null
+              }
+
+            </View>
+
+            <TextInput
+              onChangeText={setEmail}
+              placeholder={"example@mail.com"}
+              placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
+              autoCapitalize='none'
+              style={[SharedStyles.typography.button, {
+                borderBottomWidth: 1,
+                borderColor: emailError !== null ? !emailError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
+                color: Colors.themeColor(state.theme).textColor
+
+              }]} />
 
             {
-              emailError !== null ? !emailError ? <AntDesign
-                name="checkcircleo"
-                size={20}
-                color={Colors.themeColor(state.theme).success}
-              /> : <AntDesign
-                name="exclamationcircleo"
-                size={20}
-                color={Colors.themeColor(state.theme).warning}
-              /> : null
+              emailError && <Text style={ { color: Colors.themeColor(state.theme).textColor }}>{localization("emailErrorMsg")}</Text>
             }
 
           </View>
 
-          <TextInput
-            onChangeText={setEmail}
-            placeholder={"example@mail.com"}
-            placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
-            autoCapitalize='none'
-            style={[SharedStyles.typography.button, {
-              borderBottomWidth: 1,
-              borderColor: emailError !== null ? !emailError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
-              color: Colors.themeColor(state.theme).textColor
+          <View style={{ marginBottom: 20 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
+              <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
+                {localization("password")}
 
-            }]} />
+              </Text>
 
-          {
-            emailError && <Text style={ { color: Colors.themeColor(state.theme).textColor }}>{localization("emailErrorMsg")}</Text>
-          }
+              {
+                passwordError !== null ? !passwordError ? <AntDesign
+                  name="checkcircleo"
+                  size={20}
+                  color={Colors.themeColor(state.theme).success}
+                /> : <AntDesign
+                  name="exclamationcircleo"
+                  size={20}
+                  color={Colors.themeColor(state.theme).warning}
+                /> : null
+              }
 
-        </View>
+            </View>
 
-        <View style={{ marginBottom: 20 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-            <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
-              {localization("password")}
-
-            </Text>
+            <TextInput
+              onChangeText={setPassword}
+              placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
+              secureTextEntry={true}
+              autoCapitalize='none'
+              placeholder='********'
+              style={[SharedStyles.typography.button, {
+                borderBottomWidth: 1,
+                borderColor: passwordError !== null ? !passwordError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
+                color: Colors.themeColor(state.theme).textColor
+              }]} />
 
             {
-              passwordError !== null ? !passwordError ? <AntDesign
-                name="checkcircleo"
-                size={20}
-                color={Colors.themeColor(state.theme).success}
-              /> : <AntDesign
-                name="exclamationcircleo"
-                size={20}
-                color={Colors.themeColor(state.theme).warning}
-              /> : null
+              passwordError && <Text style={ { color: Colors.themeColor(state.theme).textColor }}>{passwordErrorMsg}</Text>
             }
 
           </View>
 
-          <TextInput
-            onChangeText={setPassword}
-            placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
-            secureTextEntry={true}
-            autoCapitalize='none'
-            placeholder='********'
-            style={[SharedStyles.typography.button, {
-              borderBottomWidth: 1,
-              borderColor: passwordError !== null ? !passwordError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
-              color: Colors.themeColor(state.theme).textColor
-            }]} />
+          <View style={{ marginBottom: 20 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
+              <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
+                {localization("confirmPassword")}
 
-          {
-            passwordError && <Text style={ { color: Colors.themeColor(state.theme).textColor }}>{passwordErrorMsg}</Text>
-          }
+              </Text>
+              {
+                confirmPasswordError !== null ? !confirmPasswordError ? <AntDesign
+                  name="checkcircleo"
+                  size={20}
+                  color={Colors.themeColor(state.theme).success}
+                /> : <AntDesign
+                  name="exclamationcircleo"
+                  size={20}
+                  color={Colors.themeColor(state.theme).warning}
+                /> : null
+              }
+            </View>
 
-        </View>
+            <TextInput
+              onChangeText={setConfirmPassword}
+              placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
+              secureTextEntry={true}
+              autoCapitalize='none'
+              placeholder='********'
+              style={[SharedStyles.typography.button, {
+                borderBottomWidth: 1,
+                borderColor: confirmPasswordError !== null ? !confirmPasswordError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
 
-        <View style={{ marginBottom: 20 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-            <Text style={{ fontSize: 20, marginRight: 5, color: Colors.themeColor(state.theme).secondary }}>
-              {localization("confirmPassword")}
-
-            </Text>
+                color: Colors.themeColor(state.theme).textColor
+              }]} />
             {
-              confirmPasswordError !== null ? !confirmPasswordError ? <AntDesign
-                name="checkcircleo"
-                size={20}
-                color={Colors.themeColor(state.theme).success}
-              /> : <AntDesign
-                name="exclamationcircleo"
-                size={20}
-                color={Colors.themeColor(state.theme).warning}
-              /> : null
+              confirmPasswordError && <Text style={ { color: Colors.themeColor(state.theme).textColor }}>{passwordErrorMsg}</Text>
             }
           </View>
+          <CircleBtn
+            onPress={() => onHandleSignup()}
+            color={Colors.themeColor("light").primary}
+            style={{
+              marginTop: 20,
+              justifyContent: "center",
+              alignItems: "center"
+            }}>
+            <Text style={[SharedStyles.typography.button, { color: Colors.themeColor("dark").textColor }]}>{localization("register")}</Text>
+          </CircleBtn>
+        </KeyboardAvoidingView>
+      }
 
-          <TextInput
-            onChangeText={setConfirmPassword}
-            placeholderTextColor={Colors.themeColor(state.theme).placeholderColor}
-            secureTextEntry={true}
-            autoCapitalize='none'
-            placeholder='********'
-            style={[SharedStyles.typography.button, {
-              borderBottomWidth: 1,
-              borderColor: confirmPasswordError !== null ? !confirmPasswordError ? Colors.themeColor(state.theme).success : Colors.themeColor(state.theme).warning : Colors.themeColor(state.theme).textColor,
-
-              color: Colors.themeColor(state.theme).textColor
-            }]} />
-          {
-            confirmPasswordError && <Text style={ { color: Colors.themeColor(state.theme).textColor }}>{passwordErrorMsg}</Text>
-          }
-        </View>
-        <CircleBtn
-          onPress={() => onHandleSignup()}
-          color={Colors.themeColor("light").primary}
-          style={{
-            marginTop: 20,
-            justifyContent: "center",
-            alignItems: "center"
-          }}>
-          <Text style={[SharedStyles.typography.button, { color: Colors.themeColor("dark").textColor }]}>{localization("register")}</Text>
-        </CircleBtn>
-      </KeyboardAvoidingView>
     </View>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { Pressable, Text, TextInput, View, KeyboardAvoidingView, ActivityIndicator } from "react-native";
+import { Pressable, Text, TextInput, View, KeyboardAvoidingView, ActivityIndicator, Alert } from "react-native";
 
 // Constants
 import Constants from "expo-constants";
@@ -18,11 +18,11 @@ import { StoreContext } from "../store/reducer";
 import { actions, createAction } from "../store/actions";
 
 // Firebase
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
 
 // Localization
 import { localization } from "../localization";
-import { getStoredLocalNotes, storeUser } from "../helpers/async-storage-helper";
+import { getStoredLocalNotes, storeLocalNotes, storeUser } from "../helpers/async-storage-helper";
 import { getUserNotes } from "../endpoint/firestore";
 
 const Login = ({ navigation }) => {
@@ -46,22 +46,37 @@ const Login = ({ navigation }) => {
 
         await signInWithEmailAndPassword(auth, email, password)
           .then(async (resp) => {
-            const userNotes = await getUserNotes(resp.user.uid);
-            console.log(resp);
-            setIsLoading(false);
-            setLoginError(false);
+            if (resp.user.emailVerified) {
+              const userNotes = await getUserNotes(resp.user.uid, dispatch);
+              console.log(resp);
+              setIsLoading(false);
+              setLoginError(false);
 
-            console.log(userNotes);
+              console.log(userNotes);
 
-            dispatch(createAction(actions.USER_LOGIN, resp.user));
-            dispatch(createAction(actions.ADD_NOTE, []));
+              dispatch(createAction(actions.USER_LOGIN, resp.user));
 
-            storeUser(resp.user);
+              storeUser(resp.user);
+            } else {
+              Alert.alert("Potvrda emaila nije dovršena", "Niste potvrdili vašu email adresu. Želite li da vam ponovno pošaljemo email za potvrdu?", [
+                {
+                  text: "Pošalji",
+                  onPress: () => {
+                    sendEmailVerification(resp.user);
+                  }
+                },
+                {
+                  text: "Odustani",
+                  style: "destructive",
+                  onPress: () => {}
+                }
+              ]);
+              setIsLoading(false);
+            }
           });
       }
     } catch (error) {
       setLoginError(true);
-      alert(error);
       console.log(error);
       setIsLoading(false);
     }
@@ -70,8 +85,9 @@ const Login = ({ navigation }) => {
   const loginAsGuest = async () => {
     const localNotes = await getStoredLocalNotes();
 
-    dispatch(createAction(actions.USER_LOGIN, "Guest"));
+    dispatch(createAction(actions.USER_LOGIN, { email: "Guest" }));
     dispatch(createAction(actions.ADD_NOTE, localNotes));
+    dispatch(createAction(actions.ADD_LOCAL_NOTES, localNotes));
     storeUser({ email: "Guest" });
   };
 
