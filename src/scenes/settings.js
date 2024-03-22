@@ -23,7 +23,7 @@ import { actions, createAction } from "../store/actions";
 
 // Firebase
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth, sendPasswordResetEmail, signOut } from "firebase/auth";
 import { storeLocalNotes, storeUser } from "../helpers/async-storage-helper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { addUserNote } from "../endpoint/firestore";
@@ -70,6 +70,16 @@ const Settings = ({ navigation }) => {
     }
   };
 
+  const changePassword = () => {
+    sendPasswordResetEmail(auth, state.user.email)
+      .then(() => {
+        Alert.alert("Email poslan", "Poslan vam je email sa uputama za promijenu lozinke");
+      })
+      .catch(e => {
+        Alert.alert("Greška", "Pokušajte ponovno kasnije");
+      });
+  };
+
   const syncLocalNotesWithFirestore = async () => {
     try {
       await state.localNotes.forEach(async (note) => {
@@ -109,13 +119,26 @@ const Settings = ({ navigation }) => {
         rightElement={null}
       />
 
-      <View style={[styles.container]}>
-
-        <Text style={[SharedStyles.typography.subtitle, { color: Colors.themeColor(state.theme).textColor }]}>User</Text>
+      <View style={[styles.container, { marginTop: Typography.FONT_SIZE_TITLE_MD * 2 }]}>
+        <Text style={[SharedStyles.typography.subtitle, { color: Colors.themeColor(state.theme).textColor }]}>{localization("userAccount")}</Text>
         <View style={styles.dataContainer}>
           <View style={[styles.dataItem, { borderColor: Colors.themeColor(state.theme).textColor }]}>
             <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>{state.user.email}</Text>
           </View>
+          {
+            state.user.email !== "Guest" &&
+            <Pressable
+              style={[styles.dataItem, { borderColor: Colors.themeColor(state.theme).textColor }]}
+              onPress={() => {
+                changePassword();
+              }}
+            >
+              <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>{localization("changePassword")}</Text>
+              <View style={{}}>
+                <Feather name="chevron-right" size={18}/>
+              </View>
+            </Pressable>
+          }
         </View>
 
         <Text style={[SharedStyles.typography.subtitle, { color: Colors.themeColor(state.theme).textColor }]}>{localization("appSettings")}</Text>

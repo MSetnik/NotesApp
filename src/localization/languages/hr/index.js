@@ -29,7 +29,14 @@ const hr = {
   searchEmpty: "Nema bilješki na temelju tvoje pretrage.",
   verifyMail: "Potvrdi email",
   verifyHelpText: "Slijedite upute koje smo vam poslali na email kako bi potvrdili svoju email adresu.",
-  syncNotes: "Poveži bilješke sa računom"
+  syncNotes: "Poveži bilješke sa računom",
+  forgotPassword: "Zaboravljena lozinka",
+  send: "Pošalji",
+  userAccount: "Korisnički profil",
+  forgotPasswordSubtext: "Unesite svoju adresu kako bi dobili email za resetiranje lozinke",
+  changePassword: "Promijeni lozinku",
+  done: "Završi"
+
 };
 
 export default hr;

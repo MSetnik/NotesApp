@@ -170,6 +170,10 @@ const Login = ({ navigation }) => {
               textTransform: "none"
             }]} />
 
+          <Pressable onPress={() => navigation.navigate("forgotPassword")} style={{ marginTop: 4 }} >
+            <Text style={[SharedStyles.typography.bodySmall]}>Zaboravili ste lozinku?</Text>
+          </Pressable>
+
         </View>
         <CircleBtn color={Colors.themeColor("light").primary} style={{ marginTop: Typography.FONT_SIZE_TITLE_MD, justifyContent: "center", alignItems: "center" }}
           onPress={() => onHandleLogin()}

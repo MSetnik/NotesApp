@@ -12,6 +12,7 @@ import Register from "../scenes/register";
 
 // Firebase
 import { Firebase } from "../firebase-config";
+import ForgotPassword from "../scenes/forgotPassword";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +25,7 @@ const LoginStack = () => {
     >
       <Stack.Screen name="Login" component={Login}/>
       <Stack.Screen name="Register" component={Register}/>
+      <Stack.Screen name="forgotPassword" component={ForgotPassword}/>
     </Stack.Navigator>
   );
 };

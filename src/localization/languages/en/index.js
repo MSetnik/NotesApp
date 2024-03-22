@@ -30,7 +30,13 @@ const en = {
   searchEmpty: "No notes found. Try with different search.",
   verifyMail: "Verification",
   verifyHelpText: "Please follow instructions that is being sent to your email address.",
-  syncNotes: "Sync notes with account"
+  syncNotes: "Sync notes with account",
+  forgotPassword: "Forgoten password",
+  forgotPasswordSubtext: "Enter your email to recieve password change email",
+  userAccount: "User account",
+  send: "Send",
+  changePassword: "Change password",
+  done: "Done"
 
 };
 

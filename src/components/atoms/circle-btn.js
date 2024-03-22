@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { Pressable } from "react-native";
+import { ActivityIndicator, Pressable } from "react-native";
 
 // Style
-import { Typography } from "../../styles";
+import { Colors, Typography } from "../../styles";
 
 // Icon package
 
@@ -12,7 +12,8 @@ const CircleBtn = ({
   borderRadius = Typography.FONT_SIZE_TITLE_LG * 2,
   onPress,
   style,
-  disabled = false
+  disabled = false,
+  isLoading = false
 }) => {
   const [pressOpacity, setPressOpacity] = useState(1);
   return (
@@ -28,7 +29,10 @@ const CircleBtn = ({
       onPressIn={() => setPressOpacity(0.5)}
       onPressOut={() => setPressOpacity(1)}
     >
-      {children}
+      {
+        isLoading ? <ActivityIndicator size="small" color={Colors.themeColor("dark").textColor}/> : children
+
+      }
     </Pressable>
   );
 };

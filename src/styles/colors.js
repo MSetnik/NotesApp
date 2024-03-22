@@ -1,11 +1,3 @@
-// import { useContext } from "react";
-
-// // Store
-
-// import { actions, createAction } from "../store/actions";
-
-// const store = useContext(StoreContext);
-// const state = store.state;
 
 // Theme colors
 export const darkTheme = {
@@ -22,6 +14,7 @@ export const darkTheme = {
   btnColor: "#333332",
   addNoteBtn: "#333332",
   error: "#db0f0f",
+  errorLight: "#ffbdbd",
   textColor: "#FFFFFF",
   textColorSecondary: "#000000",
   backgroundSecondary: "#7a7a79",
@@ -49,6 +42,7 @@ export const lightTheme = {
   btnColor: "#EAEAEA",
   addNoteBtn: "#FFFFFF",
   error: "#DB0F0F",
+  errorLight: "#ffbdbd",
   textColor: "#000000",
   textColorSecondary: "#FFFFFF",
   backgroundSecondary: "#F7F7F7",
@@ -63,11 +57,6 @@ export const lightTheme = {
 
 // Color theme selector
 export const themeColor = (colorScheme) => {
-  // const currentThemeType = "light";
-
-  // if (store.state.darkTheme) {
-  // }
-
   if (colorScheme === "light") {
     return lightTheme;
   } else {

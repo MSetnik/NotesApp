@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { View, Text, FlatList, ActivityIndicator, Pressable, TextInput } from "react-native";
+import { View, Text, FlatList, ActivityIndicator, Pressable, TextInput, Platform } from "react-native";
 
 // Reanimated
 import Animated, { useSharedValue, withTiming, Easing, ReduceMotion, useAnimatedStyle } from "react-native-reanimated";
@@ -24,6 +24,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useFocusEffect } from "@react-navigation/native";
 import { FONT_SIZE_TITLE_MD } from "../styles/typography";
+import { deleteUserNote } from "../endpoint/firestore";
 
 const SETTINGS = true;
 
@@ -35,12 +36,14 @@ const Home = ({ navigation }) => {
 
   const textInputRef = useRef(null);
   const flatListRef = useRef(null);
+  const noteCardRef = useRef(null);
 
   const marginTop = useSharedValue(-60);
 
   const [textInputVisible, setTextInputVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState(notes);
+  const [longPressActive, setLongPressActive] = useState(false);
 
   useEffect(() => {
     setSearchResult(notes);
@@ -93,9 +96,9 @@ const Home = ({ navigation }) => {
 
   const renderItem = ({ item, index }) => {
     if (item[0] !== undefined) {
-      return <NoteCard item={item} type={1} index={index} navigation={navigation}/>;
+      return <NoteCard deleteNote={deleteUserNote} longPressActive={longPressActive} setLongPressActive={setLongPressActive} item={item} type={1} index={index} navigation={navigation} setSearchQuery={searchItem}/>;
     }
-    return <NoteCard item={item} type={2} index={index} navigation={navigation}/>;
+    return <NoteCard deleteNote={deleteUserNote} longPressActive={longPressActive} setLongPressActive={setLongPressActive} item={item} type={2} index={index} navigation={navigation} setSearchQuery={searchItem}/>;
   };
 
   const keyExtractor = (item) => {
@@ -152,7 +155,12 @@ const Home = ({ navigation }) => {
           leftElement={
             <Text style={{ fontSize: Typography.FONT_SIZE_NORMAL * 2, color: Colors.themeColor(state.theme).textColor }}>{localization("notes")}</Text>
           }
-          rightElement={SETTINGS && <View style={{ flexDirection: "row" }}>
+          rightElement={SETTINGS && longPressActive ? <CircleBtn
+            onPress={() => { setLongPressActive(false); }}
+            color={Colors.themeColor(state.theme).btnColor}
+          >
+            <Text style={[SharedStyles.typography.bodySmall, { color: Colors.themeColor(state.theme).textColor }]}>{localization("done")}</Text>
+          </CircleBtn> : <View style={{ flexDirection: "row" }}>
             <CircleBtn
               disabled={notes.length === 0}
               color={Colors.themeColor(state.theme).btnColor}
@@ -258,7 +266,11 @@ const Home = ({ navigation }) => {
       <View style={[{ position: "absolute", bottom: bottom + Typography.FONT_SIZE_TITLE_MD * 2, right: Typography.FONT_SIZE_TITLE_MD * 2 }, SharedStyles.shadow.elevation5]}>
         <CircleBtn
           color={Colors.themeColor(state.theme).secondary}
-          onPress={() => navigation.navigate("NoteDetails")}
+          onPress={() => {
+            navigation.navigate("NoteDetails");
+            searchItem("");
+            setLongPressActive(false);
+          }}
           style={[SharedStyles.shadow.elevation5, { padding: Typography.FONT_SIZE_TITLE_LG / 1.15 }]}
         >
           <Feather name="plus" size={Typography.FONT_SIZE_TITLE_LG} color={Colors.themeColor("dark").textColor} />
